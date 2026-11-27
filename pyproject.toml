@@ -53,7 +53,13 @@ warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["emporio.domain.*", "emporio.tools.*", "emporio.llm.*"]
+module = [
+    "emporio.domain.*",
+    "emporio.tools.*",
+    "emporio.llm.*",
+    "emporio.agent.*",
+    "emporio.observability.*",
+]
 strict = true
 
 [tool.pytest.ini_options]

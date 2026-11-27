@@ -1,4 +1,4 @@
-"""Valores prontos para o cliente: o modelo copia, nunca formata nem arredonda (D-40)."""
+"""Valores prontos para o cliente: o modelo copia, nunca formata nem arredonda."""
 
 from datetime import date, datetime
 from decimal import Decimal
@@ -23,3 +23,18 @@ def br_date(d: date) -> str:
 
 def br_datetime(moment: datetime) -> str:
     return f"{moment:%d/%m/%Y} às {moment:%H:%M}"
+
+
+WEEKDAYS = (
+    "segunda-feira",
+    "terça-feira",
+    "quarta-feira",
+    "quinta-feira",
+    "sexta-feira",
+    "sábado",
+    "domingo",
+)
+
+
+def weekday_name(d: date) -> str:
+    return WEEKDAYS[d.weekday()]

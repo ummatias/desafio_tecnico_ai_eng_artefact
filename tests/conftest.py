@@ -25,3 +25,10 @@ def seeded_engine() -> Iterator[Engine]:
     seed(engine, DATA_DIR, KNOWLEDGE_DIR)
     yield engine
     engine.dispose()
+
+
+@pytest.fixture
+def fresh_engine(empty_engine: Engine) -> Engine:
+    """Banco semeado próprio do teste, para quem grava (ex.: chamados)."""
+    seed(empty_engine, DATA_DIR, KNOWLEDGE_DIR)
+    return empty_engine
