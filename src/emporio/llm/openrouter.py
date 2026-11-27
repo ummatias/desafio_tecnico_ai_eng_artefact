@@ -206,7 +206,7 @@ class OpenRouterClient:
             raw = self._client.chat.completions.with_raw_response.create(**kwargs)
         except APIStatusError as exc:
             retry_after = _retry_after(exc.response.headers)
-            if exc.status_code in TRANSIENT_STATUS or (exc.status_code == 402 and retry_after):
+            if exc.status_code in TRANSIENT_STATUS or (exc.status_code == 402 and retry_after is not None):
                 raise _Transient(f"HTTP {exc.status_code}", retry_after) from exc
             raise self._rejected(exc) from exc
         except APIConnectionError as exc:  # inclui timeout
