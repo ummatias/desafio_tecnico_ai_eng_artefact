@@ -1,6 +1,6 @@
 # SINTÉTICO. Não são eventos reais de transportadora.
 # Lido só com TRACKING_SOURCE=fixture (exemplos e evals). 
-
+#
 # Padrão: TRACKING_SOURCE=none.
 # Eventos de entrega dos pedidos 1 a 5, entre order_date e estimated_delivery.
 # Pedidos 6 e 7: entregues, sem evento (rastreio indisponível). Pedido 8: não entregue.
