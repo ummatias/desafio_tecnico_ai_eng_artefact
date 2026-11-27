@@ -1,8 +1,8 @@
 """
-    Schema do banco (SQLAlchemy Core).
-    
-    Dinheiro em centavos inteiros.
-    
+Schema do banco (SQLAlchemy Core).
+
+Dinheiro em centavos inteiros.
+
 """
 
 from sqlalchemy import (
@@ -62,7 +62,6 @@ products = Table(
     Column("status", Text, nullable=False),
     Column("specs_json", Text, nullable=False),
     Column("created_at", Date, nullable=False),
-
     # Derivadas
     Column("strings_type", Text),
     Column("string_count", Integer),
@@ -118,10 +117,8 @@ orders = Table(
     Column("customer_id", Integer, ForeignKey("customers.customer_id"), nullable=False),
     Column("order_date", Date, nullable=False),
     Column("status", Text, nullable=False),
-    
     Column("total_cents", Integer, nullable=False),
     Column("payment_method", Text, nullable=False),
-
     # Derivada de payment_method: NULL para PIX/boleto, 1 para débito, n para crédito em n parcelas
     Column("installments", Integer),
     Column("tracking_code", Text),
@@ -136,7 +133,6 @@ orders = Table(
     CheckConstraint(
         "installments IS NULL OR installments BETWEEN 1 AND 12", name="ck_orders_installments"
     ),
-
     # Rastreio e previsão só podem faltar antes do envio ou no cancelamento
     CheckConstraint(
         f"{_in('status', STATUSES_WITHOUT_SHIPPING)} "

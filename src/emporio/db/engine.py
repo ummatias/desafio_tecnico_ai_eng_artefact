@@ -25,7 +25,7 @@ def make_engine(url: str) -> Engine:
         @event.listens_for(engine, "connect")
         def _on_connect(dbapi_connection: Any, _record: Any) -> None:
             # O pysqlite não abre transação antes de DDL: um DROP seria confirmado mesmo que o
-            # INSERT seguinte falhasse. 
+            # INSERT seguinte falhasse.
             # Desligamos o controle dele e emitimos BEGIN nós mesmos.
             dbapi_connection.isolation_level = None
             cursor = dbapi_connection.cursor()

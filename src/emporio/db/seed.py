@@ -57,7 +57,11 @@ class _ReviewedProduct(BaseModel):
 
 
 class CatalogReview(BaseModel):
-    """`knowledge/catalog_review.yaml`: produtos com cadastro inconsistente, revisados manualmente"""
+    """
+    `knowledge/catalog_review.yaml`: produtos com cadastro inconsistente
+
+    Revisado manualmente
+    """
 
     model_config = ConfigDict(extra="forbid")
     revisado_em: date

@@ -36,12 +36,12 @@ def cents_to_decimal(cents: int) -> Decimal:
 
 def normalize_phone(raw: str) -> str | None:
     """
-        Normaliza um número de telefone brasileiro.
+    Normaliza um número de telefone brasileiro.
 
-        Telefone brasileiro -> dígitos nacionais (DDD + número, 10 ou 11 dígitos).
+    Telefone brasileiro -> dígitos nacionais (DDD + número, 10 ou 11 dígitos).
 
-        Aceita formatado ("(67) 99654-7821") e E.164 ("+5567996547821"): remove o DDI 55.
-        Prefixo de operadora, DDI estrangeiro ou número sem DDD -> None.
+    Aceita formatado ("(67) 99654-7821") e E.164 ("+5567996547821"): remove o DDI 55.
+    Prefixo de operadora, DDI estrangeiro ou número sem DDD -> None.
     """
     digits = _NON_DIGIT_RE.sub("", raw)
     if len(digits) in (12, 13) and digits.startswith("55"):
@@ -75,8 +75,8 @@ def string_count(specs: dict[str, str]) -> int | None:
 
 def is_electric(specs: dict[str, str], category_id: int) -> bool | None:
     """
-        `specs.electronics` quando existe
-        Guitarras são elétricas, senão desconhecido (None).
+    `specs.electronics` quando existe
+    Guitarras são elétricas, senão desconhecido (None).
     """
     electronics = specs.get("electronics", "").strip().lower()
     if electronics == "yes":
@@ -90,10 +90,10 @@ def is_electric(specs: dict[str, str], category_id: int) -> bool | None:
 
 def installments(payment_method: str) -> int | None:
     """
-        Número de parcelas: 
-            credit_<n>x -> n
-            débito -> 1
-            PIX e boleto -> None
+    Número de parcelas:
+        credit_<n>x -> n
+        débito -> 1
+        PIX e boleto -> None
     """
     if payment_method == "debit":
         return 1
