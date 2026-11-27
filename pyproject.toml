@@ -16,7 +16,12 @@ dependencies = [
     "tzdata>=2026.6",
     "rapidfuzz>=3.14.6",
     "openai>=3.60.0",
+    "typer>=0.29.3",
+    "rich>=15.0.0",
 ]
+
+[project.scripts]
+emporio = "emporio.cli:app"
 
 [dependency-groups]
 dev = [
@@ -59,6 +64,7 @@ module = [
     "emporio.llm.*",
     "emporio.agent.*",
     "emporio.observability.*",
+    "emporio.cli",
 ]
 strict = true
 
