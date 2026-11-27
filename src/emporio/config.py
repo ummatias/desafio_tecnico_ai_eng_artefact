@@ -1,12 +1,14 @@
 """Configuração da aplicação, lida de variáveis de ambiente (e de `.env`)."""
 
-from datetime import date
+from datetime import date, datetime, time
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DEFAULT_REFERENCE_TIME = time(10)
 
 
 class Settings(BaseSettings):
@@ -24,15 +26,29 @@ class Settings(BaseSettings):
     # CSVs originais (somente leitura) e base de conhecimento curada
     data_dir: Path = Path("data")
     knowledge_dir: Path = Path("knowledge")
+    # Texto das premissas, devolvido pela get_policy junto com cada seção (D-24)
+    assumptions_path: Path = Path("docs/assumptions.md")
     # Sem valor, as requisições externas não exigem autenticação.
     api_key: SecretStr | None = None
-    # Data "de hoje" usada por toda regra que depende de tempo. Vazio = data real em STORE_TZ.
-    reference_date: date | None = None
+    # "Agora" usado por toda regra que depende de tempo (REFERENCE_DATE), no fuso STORE_TZ.
+    # Aceita data com hora (2026-11-26T10:00); só a data vale às 10:00. Vazio = relógio real.
+    reference_date: datetime | None = None
     store_tz: str = "America/Campo_Grande"
     # Fonte da data de recebimento: "none" (padrão: prazos do recebimento dão to_confirm)
     # ou "fixture" (eventos SINTÉTICOS, só em exemplos e evals).
     tracking_source: Literal["none", "fixture"] = "none"
     delivery_events_path: Path = Path("fixtures/delivery_events.csv")
+    # P-08: pedido pending/confirmed há mais que isso (dias úteis) fica "stalled".
+    stalled_after_business_days: int = Field(default=5, ge=1)
+
+    @field_validator("reference_date", mode="before")
+    @classmethod
+    def _date_only_at_ten(cls, value: object) -> object:
+        if isinstance(value, str) and len(value.strip()) == 10:
+            return datetime.combine(date.fromisoformat(value.strip()), DEFAULT_REFERENCE_TIME)
+        if isinstance(value, date) and not isinstance(value, datetime):
+            return datetime.combine(value, DEFAULT_REFERENCE_TIME)
+        return value
 
 
 @lru_cache
