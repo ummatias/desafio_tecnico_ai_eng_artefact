@@ -117,7 +117,7 @@ Motivo: o manual não lista os municípios, nenhuma outra cidade dos dados fica 
 ID: P-13
 Seção: §1.2, §7
 Status: a confirmar pela loja
-Teste: pendente
+Teste: tests/agent/test_prompt.py::test_p13_contacts, tests/tools/test_policy_and_escalation.py::test_section_1_2_includes_p13
 Premissa: WhatsApp (67) 3321-4500, do §7, a seção específica do canal. Telefone (67) 3341-4444, do §1.2 e da capa, **nunca chamado de WhatsApp**. E-mail `contato@emporiodamusica.com.br`, sem acento.
 Motivo: o §1.2 diz "Telefone / WhatsApp (67) 3341-4444", e o §7 diz "O canal de WhatsApp (67) 3321-4500". O e-mail sem acento é o da capa, o acentuado (`empóriodamusica`) é outro domínio (IDN), e mensagens para ele provavelmente não chegam à loja.
 
@@ -125,7 +125,7 @@ Motivo: o §1.2 diz "Telefone / WhatsApp (67) 3341-4444", e o §7 diz "O canal d
 ID: P-14
 Seção: §1, §7.1
 Status: adotada
-Teste: pendente
+Teste: tests/agent/test_prompt.py::test_p14_no_partner_store
 Premissa: nenhuma loja parceira é nomeada. Pedidos de acessórios são redirecionados com educação, sem indicar uma loja específica.
 Motivo: o §7.1 diz "sugerir lojas parceiras quando possível", mas o manual e os dados não nomeiam nenhuma, inventar uma seria informação sem fonte.
 

@@ -49,6 +49,9 @@ class Settings(BaseSettings):
     delivery_events_path: Path = Path("fixtures/delivery_events.csv")
     # P-08: pedido pending/confirmed há mais que isso (dias úteis) fica "stalled".
     stalled_after_business_days: int = Field(default=5, ge=1)
+    # Trace JSONL, uma linha por turno, com dados pessoais mascarados.
+    trace_enabled: bool = True
+    trace_path: Path = Path("var/traces/turns.jsonl")
 
     @property
     def llm_provider_order(self) -> list[str]:
