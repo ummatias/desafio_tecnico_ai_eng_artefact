@@ -75,8 +75,8 @@ Motivo: o §3.1 é a regra específica de parcelamento, a tabela resume a faixa 
 ID: P-08
 Seção: — (o manual é omisso)
 Status: adotada
-Teste: pendente
-Premissa: pedido em `pending` ou `confirmed` há mais de 5 dias úteis (P-20) → `situacao = parado`. O valor é configurável.
+Teste: tests/domain/test_orders.py::test_p08_stalled_after_5_business_days, tests/domain/test_orders.py::test_p08_holiday_does_not_count, tests/domain/test_orders.py::test_p08_open_orders_stalled
+Premissa: pedido em `pending` ou `confirmed` há mais de 5 dias úteis (P-20) → `delivery_state = stalled`. O valor é configurável (`STALLED_AFTER_BUSINESS_DAYS`).
 Motivo: os pedidos 9–16 estão abertos há meses sem previsão (`docs/data_quality_report.md`, A01). O agente precisa reconhecer o atraso em vez de dizer "está pendente".
 
 ### P-09 · Feriados e pontos facultativos
@@ -109,7 +109,7 @@ Motivo: os pedidos têm rastreio e previsão de entrega, o que indica venda a di
 ID: P-12
 Seção: §5.1, §5.2
 Status: a confirmar pela loja
-Teste: tests/domain/test_cart.py::test_p12_metro_region_is_campo_grande, tests/domain/test_cart.py::test_p12_other_cities_a_calcular
+Teste: tests/domain/test_cart.py::test_p12_metro_region_is_campo_grande, tests/domain/test_cart.py::test_p12_other_cities_to_quote
 Premissa: "região metropolitana" = clientes com cidade Campo Grande. As demais cidades dos dados (Dourados, Corumbá, Ponta Porã, Três Lagoas) seguem o §5.2.
 Motivo: o manual não lista os municípios, nenhuma outra cidade dos dados fica na região de Campo Grande.
 
@@ -157,7 +157,7 @@ Motivo: o recebimento não está nos dados, as previsões contradizem o §5.1 (`
 ID: P-18
 Seção: §5.2
 Status: adotada
-Teste: tests/domain/test_cart.py::test_p18_no_freight_value_outside_campo_grande; pendente
+Teste: tests/domain/test_cart.py::test_p18_no_freight_value_outside_campo_grande, tests/tools/test_cart_tool.py::test_p18_quote_cart_outside_campo_grande
 Premissa: sem tabela de valores, o agente não informa um valor de frete para outras cidades. Diz que o frete é calculado pelo CEP, peso e dimensões, e que itens de grande porte podem exigir cotação individual.
 Motivo: o §5.2 dá só prazos e modalidades, não há CEP nem tarifas nos dados.
 
@@ -165,7 +165,7 @@ Motivo: o §5.2 dá só prazos e modalidades, não há CEP nem tarifas nos dados
 ID: P-19
 Seção: §6.1, §7.3
 Status: adotada
-Teste: pendente
+Teste: tests/tools/test_catalog_tools.py::test_p19_no_campaign_discount_without_active_promotion
 Premissa: as campanhas do §6.1 (como Black Friday "em todo o catálogo") só valem se houver promoção ativa no sistema para o produto.
 Motivo: o §7.3 manda verificar se a promoção está ativa e nunca prometer desconto vencido, nenhuma promoção de Black Friday está ativa (`docs/data_quality_report.md`, A08).
 

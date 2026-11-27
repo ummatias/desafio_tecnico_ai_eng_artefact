@@ -1,6 +1,6 @@
 # Produtos com cadastro inconsistente (nome, descrição e specs se contradizem).
 #
-# Preenche products.cadastro_inconsistente a partir desta lista;
+# Preenche products.inconsistent_listing a partir desta lista;
 #
 # Argumento comum ao lote 135–144: as specs são um molde repetido, contradito onde a descrição
 # informa o material, e o nome genérico não identifica o modelo.

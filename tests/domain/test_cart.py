@@ -32,7 +32,7 @@ def test_p03_limits_use_price_after_promotion_before_pix() -> None:
     # R$ 510,00 no PIX dá 484,50, mas o frete grátis usa o valor antes do PIX.
     t = cart_totals([item(51_000)], CG)
     assert t.total_pix_cents == 48_450
-    assert t.freight_rule == "gratis"
+    assert t.freight_rule == "free"
 
 
 def test_p04_pix_discount_only_on_non_promotional_items() -> None:
@@ -52,18 +52,18 @@ def test_p22_cart_rounds_per_unit() -> None:
     "city", ["Campo Grande", " campo grande ", "CAMPO GRANDE", "Campo  Grande"]
 )
 def test_p12_metro_region_is_campo_grande(city: str) -> None:
-    assert cart_totals([item(10_000)], city).freight_rule == "taxa_fixa"
+    assert cart_totals([item(10_000)], city).freight_rule == "flat_rate"
 
 
 @pytest.mark.parametrize("city", ["Dourados", "Três Lagoas", None])
-def test_p12_other_cities_a_calcular(city: str | None) -> None:
-    assert cart_totals([item(10_000)], city).freight_rule == "a_calcular"
+def test_p12_other_cities_to_quote(city: str | None) -> None:
+    assert cart_totals([item(10_000)], city).freight_rule == "to_quote"
 
 
 def test_p18_no_freight_value_outside_campo_grande() -> None:
     t = cart_totals([item(45_990)], "Dourados")
     assert t.freight_cents is None
-    assert t.frete_a_calcular
+    assert t.freight_to_quote
     assert t.total_cents == 45_990
     assert [p.n for p in t.installments] == [1, 2, 3, 4, 5]  # só os produtos
 

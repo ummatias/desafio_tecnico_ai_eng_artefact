@@ -2,7 +2,7 @@
 
 Transcrição de `data/policies.pdf`
 
-- Cada seção `## <ID> <Título>` corresponde a uma seção do manual. O ID é a numeração do manual (`4.1`, `8.1`, etc) e é o que `consultar_politica` recebe.
+- Cada seção `## <ID> <Título>` corresponde a uma seção do manual. O ID é a numeração do manual (`4.1`, `8.1`, etc) e é o que `get_policy` recebe.
 - O texto do manual está em citação (`>`), sem alterações, inclusive typos.
 - Fora da citação ficam as **anotações**: 
     `Marco` (de onde conta o prazo)

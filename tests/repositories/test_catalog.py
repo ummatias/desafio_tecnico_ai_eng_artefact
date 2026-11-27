@@ -14,7 +14,7 @@ def test_get_product(seeded_engine: Engine) -> None:
     assert product.category_name == "Violões"
     assert product.strings_type == "steel"
     assert product.is_electric is False
-    assert product.cadastro_inconsistente is False
+    assert product.inconsistent_listing is False
 
 
 def test_get_unknown_product(seeded_engine: Engine) -> None:

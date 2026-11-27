@@ -28,6 +28,7 @@ from emporio.db.rows import (
     PromotionRow,
 )
 from emporio.db.schema import (
+    APP_TABLES,
     CSV_TABLES,
     categories,
     customers,
@@ -53,7 +54,7 @@ class SeedResult:
 class _ReviewedProduct(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: int = Field(gt=0)
-    motivo: str = Field(min_length=1)
+    reason: str = Field(alias="motivo", min_length=1)
 
 
 class CatalogReview(BaseModel):
@@ -64,12 +65,12 @@ class CatalogReview(BaseModel):
     """
 
     model_config = ConfigDict(extra="forbid")
-    revisado_em: date
-    produtos: list[_ReviewedProduct]
+    reviewed_at: date = Field(alias="revisado_em")
+    products: list[_ReviewedProduct] = Field(alias="produtos")
 
     @property
     def product_ids(self) -> frozenset[int]:
-        return frozenset(p.id for p in self.produtos)
+        return frozenset(p.id for p in self.products)
 
 
 def load_catalog_review(path: Path) -> CatalogReview:
@@ -78,7 +79,7 @@ def load_catalog_review(path: Path) -> CatalogReview:
         review = CatalogReview.model_validate(raw)
     except (OSError, yaml.YAMLError, ValidationError) as exc:
         raise SeedError(f"{path}: {exc}") from exc
-    ids = [p.id for p in review.produtos]
+    ids = [p.id for p in review.products]
     duplicated = sorted({i for i in ids if ids.count(i) > 1})
     if duplicated:
         raise SeedError(f"{path}: IDs repetidos {duplicated}")
@@ -157,7 +158,7 @@ def _records(dataset: _Dataset) -> dict[Table, list[dict[str, Any]]]:
                 "string_count": derived.string_count(row.specs),
                 "is_electric": derived.is_electric(row.specs, row.category_id),
                 "normalized_name": derived.normalize_name(row.name),
-                "cadastro_inconsistente": row.product_id in flagged,
+                "inconsistent_listing": row.product_id in flagged,
             }
             for row in dataset.products
         ],
@@ -188,6 +189,8 @@ def _drop_csv_tables(conn: Connection) -> None:
 def seed(engine: Engine, data_dir: Path, knowledge_dir: Path, *, force: bool = False) -> SeedResult:
     """Popula o banco se estiver vazio (ou recria as tabelas dos CSVs com `force`)."""
     with engine.begin() as conn:
+        for table in APP_TABLES:
+            table.create(conn, checkfirst=True)
         if not force and _is_seeded(conn):
             return SeedResult(seeded=False, counts=table_counts(conn))
 

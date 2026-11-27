@@ -7,7 +7,7 @@ from typing import Literal
 
 StringsType = Literal["nylon", "steel"]
 
-GUITARRAS_CATEGORY_ID = 1
+GUITARS_CATEGORY_ID = 1
 _CREDIT_RE = re.compile(r"credit_(\d{1,2})x")
 _NON_DIGIT_RE = re.compile(r"\D")
 _NON_ALNUM_RE = re.compile(r"[^a-z0-9]+")
@@ -83,7 +83,7 @@ def is_electric(specs: dict[str, str], category_id: int) -> bool | None:
         return True
     if electronics == "no":
         return False
-    if category_id == GUITARRAS_CATEGORY_ID:
+    if category_id == GUITARS_CATEGORY_ID:
         return True
     return None
 
