@@ -1,0 +1,18 @@
+# SINTÉTICO. Não são eventos reais de transportadora.
+# Lido só com TRACKING_SOURCE=fixture (exemplos e evals). 
+
+# Padrão: TRACKING_SOURCE=none.
+# Eventos de entrega dos pedidos 1 a 5, entre order_date e estimated_delivery.
+# Pedidos 6 e 7: entregues, sem evento (rastreio indisponível). Pedido 8: não entregue.
+#
+# Cenários do motor com o pedido 5 (compra 2026-01-05; evento de entrega em 2026-01-12):
+# - REFERENCE_DATE=2026-01-19: arrependimento no 7º dia, dentro do prazo
+# - REFERENCE_DATE=2026-01-20: arrependimento no 8º dia, fora do prazo
+# - REFERENCE_DATE=2026-02-14: defeito aos 40 dias da compra, garantia legal (§8.1)
+# - REFERENCE_DATE=2026-04-13: defeito no 91º dia do recebimento, garantia do fabricante (§8.2)
+order_id,tracking_code,delivered_on
+1,BRAB1234567BR,2025-10-21
+2,BRCX9876543BR,2025-11-10
+3,BRDZ4561230BR,2025-11-28
+4,BRQM7890123BR,2025-12-17
+5,BRTP3456789BR,2026-01-12
