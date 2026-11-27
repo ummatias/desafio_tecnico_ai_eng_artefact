@@ -21,6 +21,19 @@ def test_email_and_cpf() -> None:
     assert masked == "[email] e cpf [cpf]"
 
 
+@pytest.mark.parametrize(
+    "phone", ["(67) 3321-4500", "+55 67 3321-4500", "3321-4500", "(67) 3341-4444", "33414444"]
+)
+def test_store_phones_kept(phone: str) -> None:
+    """P-13: só as formas exatas dos números da loja passam."""
+    assert Masker().text(f"fale no {phone}") == f"fale no {phone}"
+
+
+@pytest.mark.parametrize("phone", ["99 3321-4500", "(11) 3321-4500", "(11) 3341-4444"])
+def test_same_ending_other_number_masked(phone: str) -> None:
+    assert Masker().text(f"meu número é {phone}") == "meu número é [telefone]"
+
+
 def test_store_contacts_and_protocol_kept() -> None:
     text = "WhatsApp (67) 3321-4500, telefone (67) 3341-4444, protocolo EMP-20261127-0001"
     assert Masker().text(text) == text

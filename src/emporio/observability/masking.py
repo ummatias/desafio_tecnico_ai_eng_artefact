@@ -2,7 +2,8 @@
 Mascaramento de dados pessoais antes de gravar o trace.
 
 Padrões genéricos (e-mail, CPF, telefone) mais os dados exatos do cliente da sessão
-(nome, telefone, e-mail). Os contatos públicos da loja (P-13) não são mascarados.
+(nome, telefone, e-mail). Só as formas exatas dos números públicos da loja (P-13) ficam;
+um número com o mesmo final, mas outro DDD ou prefixo, é mascarado.
 """
 
 import re
@@ -14,14 +15,17 @@ from emporio.repositories import Customer
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 CPF = re.compile(r"(?<![\w-])\d{3}\.\d{3}\.\d{3}-\d{2}(?!\d)")
 PHONE = re.compile(r"(?<![\w-])(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-\s.]?\d{4}(?!\d)")
-STORE_PHONES = ("33214500", "33414444")
+# Dígitos das formas aceitas: com 55 e DDD, só com DDD e só o número.
+STORE_PHONES = frozenset(
+    f"{prefix}{number}" for number in ("33214500", "33414444") for prefix in ("5567", "67", "")
+)
 NAME_PARTICLES = frozenset({"da", "de", "do", "das", "dos", "e"})
 MIN_NAME_PART = 3
 
 
 def _phone(match: re.Match[str]) -> str:
     digits = re.sub(r"\D", "", match.group())
-    return match.group() if digits.endswith(STORE_PHONES) else "[telefone]"
+    return match.group() if digits in STORE_PHONES else "[telefone]"
 
 
 def _name_parts(name: str) -> list[str]:

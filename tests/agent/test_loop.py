@@ -208,3 +208,46 @@ def test_transcript(fresh_engine: Engine) -> None:
     llm = FakeLLMClient([SEARCH, text_response("Tenho!")])
     result = run_turn(llm, _ctx(fresh_engine), [], "tem takamine?")
     assert result.transcript == (Message.user("tem takamine?"), Message("assistant", "Tenho!"))
+
+
+def test_two_escalations_in_one_response_open_one_ticket(fresh_engine: Engine) -> None:
+    args = json.dumps({"summary": "Reclamação", "category": "complaint"})
+    twice = Response(
+        text=None,
+        tool_calls=(
+            ToolCall("a", "escalate_to_human", args),
+            ToolCall("b", "escalate_to_human", args),
+        ),
+        finish_reason="tool_calls",
+    )
+    llm = FakeLLMClient([twice, text_response("Chamado aberto!")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero reclamar")
+    assert _ticket_count(fresh_engine) == 1
+    first, second = result.tool_runs
+    assert not first.reused and second.reused
+    tool_messages = [m for m in llm.requests[1].messages if m.role == "tool"]
+    payloads = [_tool_payload(m)["data"] for m in tool_messages]
+    assert payloads[0]["protocol"] == payloads[1]["protocol"] == result.protocol  # type: ignore[index]
+    assert payloads[1]["already_escalated"] is True  # type: ignore[index]
+
+
+def test_escalations_across_iterations_open_one_ticket(fresh_engine: Engine) -> None:
+    escalate = tool_call_response(
+        "escalate_to_human", {"summary": "Reclamação", "category": "complaint"}
+    )
+    llm = FakeLLMClient([escalate, SEARCH, escalate, text_response("ok")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero reclamar")
+    assert _ticket_count(fresh_engine) == 1
+    assert [r.reused for r in result.tool_runs] == [False, False, True]
+
+
+def test_failed_escalation_does_not_block_retry(fresh_engine: Engine) -> None:
+    bad = tool_call_response("escalate_to_human", {"category": "complaint"})  # sem summary
+    good = tool_call_response(
+        "escalate_to_human", {"summary": "Reclamação", "category": "complaint"}
+    )
+    llm = FakeLLMClient([bad, good, text_response("ok")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero reclamar")
+    assert [r.error for r in result.tool_runs] == ["invalid_arguments", None]
+    assert not result.tool_runs[1].reused
+    assert _ticket_count(fresh_engine) == 1

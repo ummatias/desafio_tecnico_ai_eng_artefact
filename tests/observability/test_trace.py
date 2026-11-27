@@ -1,8 +1,10 @@
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import pytest
 from sqlalchemy import Engine
 
 from emporio.agent import PROMPT_VERSION, run_turn
@@ -90,3 +92,26 @@ def test_from_settings(tmp_path: Path) -> None:
     assert on is not None and on.path == path
     assert on.static == {"reference_date": "2026-11-26T00:00:00"}
     assert TraceWriter.from_settings(Settings(trace_enabled=False)) is None
+
+
+def test_session_id_masked(fresh_engine: Engine, tmp_path: Path) -> None:
+    tracer = TraceWriter(tmp_path / "t.jsonl")
+    llm = FakeLLMClient([text_response("oi")])
+    run_turn(llm, make_ctx(fresh_engine, ANA), [], "oi", tracer=tracer, session_id=ANA)
+    assert "99654" not in tracer.path.read_text("utf-8")
+    (line,) = _lines(tracer.path)
+    assert line["session_id"] == "[telefone]"
+
+
+def test_write_failure_does_not_fail_turn(
+    fresh_engine: Engine, tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    blocker = tmp_path / "arquivo"
+    blocker.write_text("não é pasta", encoding="utf-8")
+    tracer = TraceWriter(blocker / "turns.jsonl")
+    llm = FakeLLMClient([text_response("Oi! Como posso ajudar?")])
+    with caplog.at_level(logging.WARNING, logger="emporio.observability.trace"):
+        result = run_turn(llm, make_ctx(fresh_engine, ANA), [], "oi", tracer=tracer)
+    assert result.reply == "Oi! Como posso ajudar?"
+    assert result.stop_reason == "answer"
+    assert "trace write failed" in caplog.text

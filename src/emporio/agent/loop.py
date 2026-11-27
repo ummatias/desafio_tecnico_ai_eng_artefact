@@ -49,6 +49,8 @@ class ToolRun:
     result: ToolResult
     latency_ms: float
     by: Literal["model", "code"] = "model"
+    # Escalada repetida no turno: a tool não rodou; volta o protocolo já aberto
+    reused: bool = False
 
     @property
     def error(self) -> str | None:
@@ -88,6 +90,20 @@ def _escalation(runs: Sequence[ToolRun]) -> ToolRun | None:
         if run.name == ESCALATION_TOOL and run.error is None and "protocol" in run.result:
             return run
     return None
+
+
+def _execute(name: str, arguments: str, ctx: ToolContext, runs: Sequence[ToolRun]) -> ToolRun:
+    """Chamada do modelo. No máximo um chamado por turno: checado antes de rodar a tool."""
+    if name == ESCALATION_TOOL:
+        previous = _escalation(runs)
+        if previous is not None:
+            result = {
+                **previous.result,
+                "already_escalated": True,
+                "note": "a ticket was already opened in this turn; give the customer this protocol",
+            }
+            return ToolRun(name, arguments, result, 0.0, by="model", reused=True)
+    return _run(name, arguments, ctx, by="model")
 
 
 def _text(response: Response) -> str | None:
@@ -152,7 +168,7 @@ def run_turn(
         if response.tool_calls:
             messages.append(response.as_message())
             for call in response.tool_calls:
-                run = _run(call.name, call.arguments, ctx, by="model")
+                run = _execute(call.name, call.arguments, ctx, runs)
                 runs.append(run)
                 messages.append(Message.tool(call.id, wrap_tool_output(call.name, run.result)))
             continue
@@ -208,7 +224,7 @@ def trace_record(
     costs = [r.usage.cost_usd for r in responses]
     return {
         "ts": datetime.now(UTC).isoformat(),
-        "session_id": session_id,
+        "session_id": mask.text(session_id) if session_id is not None else None,
         "prompt_version": PROMPT_VERSION,
         "now": ctx.now.isoformat(),
         "customer_identified": ctx.customer is not None,
@@ -223,6 +239,7 @@ def trace_record(
             {
                 "name": run.name,
                 "by": run.by,
+                "reused": run.reused,
                 "args": mask.value(_args(run.arguments)),
                 "error": run.error,
                 "latency_ms": round(run.latency_ms, 1),

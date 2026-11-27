@@ -6,11 +6,14 @@ Apenas escrita
 """
 
 import json
+import logging
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from emporio.config import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class TraceWriter:
@@ -27,7 +30,11 @@ class TraceWriter:
         return cls(settings.trace_path, {"reference_date": ref.isoformat() if ref else None})
 
     def write(self, record: Mapping[str, Any]) -> None:
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+        """Grava uma linha. Falha de disco vira aviso no log: o turno do cliente segue."""
         line = json.dumps({**self.static, **record}, ensure_ascii=False, default=str)
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(line + "\n")
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a", encoding="utf-8") as fh:
+                fh.write(line + "\n")
+        except OSError:
+            logger.warning("trace write failed: %s", self.path, exc_info=True)
