@@ -1,7 +1,7 @@
 """
 Mascaramento de dados pessoais antes de gravar o trace.
 
-Padrões genéricos (e-mail, CPF, telefone) mais os dados exatos do cliente da sessão 
+Padrões genéricos (e-mail, CPF, telefone) mais os dados exatos do cliente da sessão
 (nome, telefone, e-mail). Os contatos públicos da loja (P-13) não são mascarados.
 """
 

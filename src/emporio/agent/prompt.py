@@ -3,7 +3,7 @@ System prompt versionado.
 
 O texto fica em `prompts/system_<versão>.md`
 
-Tudo o que depende do turno (agora, estado da loja, agenda, cliente) 
+Tudo o que depende do turno (agora, estado da loja, agenda, cliente)
 é calculado por código e injetado aqui.
 """
 

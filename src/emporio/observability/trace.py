@@ -1,8 +1,8 @@
 """
-    Uma linha JSONL por turno. 
-    O registro já chega mascarado
-    
-    Apenas escrita
+Uma linha JSONL por turno.
+O registro já chega mascarado
+
+Apenas escrita
 """
 
 import json
