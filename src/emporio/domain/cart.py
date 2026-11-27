@@ -2,7 +2,7 @@
 Totais do carrinho: promoções, PIX por item, frete, parcelas e pagamento combinado.
 
 Estoque é verificado na tool.
-Premissas: 
+Premissas:
     - P-02
     - P-03
     - P-04

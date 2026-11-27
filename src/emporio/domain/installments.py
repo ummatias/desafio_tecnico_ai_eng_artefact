@@ -2,7 +2,7 @@
 Parcelamento no cartão de crédito em centavos inteiros.
 
 P-05: parcelas iguais truncadas ao centavo, resto na primeira, o mínimo vale para a menor.
-P-06: até 3x, mínimo de R$ 50,00 (exceto 1x). 
+P-06: até 3x, mínimo de R$ 50,00 (exceto 1x).
 P-07: vale o §3.1, não a tabela do §3.
 """
 
