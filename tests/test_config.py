@@ -14,6 +14,12 @@ ENV_VARS = (
     "STORE_TZ",
     "TRACKING_SOURCE",
     "STALLED_AFTER_BUSINESS_DAYS",
+    "LLM_TIMEOUT_SECONDS",
+    "LLM_MAX_RETRIES",
+    "LLM_MAX_TOKENS",
+    "LLM_PROVIDERS",
+    "LLM_DATA_COLLECTION",
+    "LLM_REASONING_EFFORT",
 )
 
 
@@ -32,6 +38,9 @@ def test_defaults_without_env() -> None:
     assert settings.api_key is None
     assert settings.reference_date is None
     assert settings.store_tz == "America/Campo_Grande"
+    assert settings.llm_data_collection == "deny"
+    assert settings.llm_provider_order == []
+    assert settings.llm_reasoning_effort is None
 
 
 def test_reference_date_only_means_10am(monkeypatch: pytest.MonkeyPatch) -> None:

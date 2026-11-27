@@ -15,6 +15,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "tzdata>=2026.6",
     "rapidfuzz>=3.14.6",
+    "openai>=3.60.0",
 ]
 
 [dependency-groups]
@@ -52,9 +53,10 @@ warn_unused_ignores = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["emporio.domain.*", "emporio.tools.*"]
+module = ["emporio.domain.*", "emporio.tools.*", "emporio.llm.*"]
 strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
+addopts = "-ra -m 'not live'"
+markers = ["live: chamada real ao LLM (precisa de LLM_API_KEY); rode com `pytest -m live`"]
