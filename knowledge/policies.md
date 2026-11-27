@@ -128,7 +128,7 @@ Página 4.
 
 **Marco:** 7 dias corridos a partir do **recebimento** (fonte confiável: P-17). Reembolso em até 10
 dias úteis (P-20).
-**Premissas:** P-11, P-17, P-20.
+**Premissas:** P-11, P-17, P-20, P-24, P-25.
 
 ## 4.2 Trocas por Defeito
 
@@ -142,7 +142,7 @@ Página 4.
 >   autorizadas não são cobertos.
 
 **Marco:** 30 dias corridos a partir da **compra** (`order_date`, confiável).
-**Premissas:** P-01. "Após os 30 dias… diretamente com o fabricante" não se aplica enquanto houver
+**Premissas:** P-01, P-25. "Após os 30 dias… diretamente com o fabricante" não se aplica enquanto houver
 garantia legal (§8.1).
 
 ## 4.3 Trocas por Preferência
@@ -155,7 +155,7 @@ Página 4.
 > - Diferenças de valor serão cobradas ou reembolsadas conforme o caso.
 
 **Marco:** 7 dias a partir do **recebimento**. O manual não diz o marco; a escolha é a P-16.
-**Premissas:** P-16, P-17.
+**Premissas:** P-16, P-17, P-24, P-25.
 
 ## 4.4 Itens Não Elegíveis para Troca
 
@@ -165,7 +165,7 @@ Página 4.
 > - Produtos adquiridos em promoções de liquidação com aviso explícito de "venda final".
 > - Boquilhas de instrumentos de sopro, por questões de higiene.
 
-**Premissas:** P-21.
+**Premissas:** P-21, P-25.
 
 ## 5 Política de Frete e Entregas
 
@@ -325,7 +325,7 @@ Página 7.
 > cliente.
 
 **Marco:** 90 dias a partir do **recebimento** (fonte confiável: P-17).
-**Premissas:** P-01, P-17.
+**Premissas:** P-01, P-17, P-24, P-25.
 
 ## 8.2 Garantia do Fabricante
 
