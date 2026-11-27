@@ -21,12 +21,21 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr | None = None
     llm_base_url: str = "https://openrouter.ai/api/v1"
     llm_model: str = "openai/gpt-oss-120b"
+    llm_timeout_seconds: float = Field(default=30, gt=0)
+    llm_max_retries: int = Field(default=2, ge=0, le=5)
+    llm_max_tokens: int = Field(default=2048, ge=256)
+    # Providers do OpenRouter em ordem, separados por vírgula; vazio = roteamento padrão.
+    # Com valor, não há fallback para outros providers (evals e comparação, commit 13).
+    llm_providers: str = ""
+    # "deny": só providers que não guardam os dados (as mensagens têm dados de clientes
+    llm_data_collection: Literal["allow", "deny"] = "deny"
+    llm_reasoning_effort: Literal["low", "medium", "high"] | None = None
 
     database_url: str = "sqlite:///var/emporio.db"
     # CSVs originais (somente leitura) e base de conhecimento curada
     data_dir: Path = Path("data")
     knowledge_dir: Path = Path("knowledge")
-    # Texto das premissas, devolvido pela get_policy junto com cada seção (D-24)
+    # Texto das premissas, devolvido pela get_policy junto com cada seção
     assumptions_path: Path = Path("docs/assumptions.md")
     # Sem valor, as requisições externas não exigem autenticação.
     api_key: SecretStr | None = None
@@ -40,6 +49,10 @@ class Settings(BaseSettings):
     delivery_events_path: Path = Path("fixtures/delivery_events.csv")
     # P-08: pedido pending/confirmed há mais que isso (dias úteis) fica "stalled".
     stalled_after_business_days: int = Field(default=5, ge=1)
+
+    @property
+    def llm_provider_order(self) -> list[str]:
+        return [p.strip() for p in self.llm_providers.split(",") if p.strip()]
 
     @field_validator("reference_date", mode="before")
     @classmethod
