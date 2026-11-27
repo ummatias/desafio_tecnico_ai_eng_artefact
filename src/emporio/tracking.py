@@ -1,7 +1,7 @@
 """
 Fontes da data de recebimento.
 
-`TRACKING_SOURCE=none` (padrão): sem rastreio, prazos contados do recebimento dão `to_confirm`. 
+`TRACKING_SOURCE=none` (padrão): sem rastreio, prazos contados do recebimento dão `to_confirm`.
 `fixture`: lê `fixtures/delivery_events.csv`, SINTÉTICO, só para exemplos e evals.
 
 

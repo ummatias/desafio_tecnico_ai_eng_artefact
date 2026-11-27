@@ -1,5 +1,5 @@
 """
-Prazos e saídas escritos à mão a partir da política (D-27). 
+Prazos e saídas escritos à mão a partir da política (D-27).
 
 Dias corridos, fechados no fim.
 """
