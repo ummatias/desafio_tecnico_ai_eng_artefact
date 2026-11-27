@@ -25,7 +25,7 @@ FIXED_FREIGHT_CENTS = 3_500  # §5.1
 COMBINED_PAYMENT_FROM_CENTS = 200_000  # §3.1 "acima de R$ 2.000,00" (P-02)
 METRO_CITY = "campo grande"  # P-12
 
-FreightRule = Literal["gratis", "taxa_fixa", "a_calcular"]
+FreightRule = Literal["free", "flat_rate", "to_quote"]
 
 
 @dataclass(frozen=True)
@@ -83,7 +83,7 @@ class CartTotals:
         return self.pix_subtotal_cents + (self.freight_cents or 0)
 
     @property
-    def frete_a_calcular(self) -> bool:
+    def freight_to_quote(self) -> bool:
         """P-18: fora de Campo Grande o frete não tem valor; totais cobrem só os produtos."""
         return self.freight_cents is None
 
@@ -114,10 +114,10 @@ def _line(item: CartItem) -> CartLine:
 
 def _freight(subtotal_cents: int, city: str | None) -> tuple[int | None, FreightRule]:
     if not is_metro_region(city):
-        return None, "a_calcular"  # P-18
+        return None, "to_quote"  # P-18
     if subtotal_cents >= FREE_FREIGHT_FROM_CENTS:  # P-02, P-03
-        return 0, "gratis"
-    return FIXED_FREIGHT_CENTS, "taxa_fixa"
+        return 0, "free"
+    return FIXED_FREIGHT_CENTS, "flat_rate"
 
 
 def cart_totals(items: Sequence[CartItem], city: str | None) -> CartTotals:

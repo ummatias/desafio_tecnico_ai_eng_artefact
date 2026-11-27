@@ -44,37 +44,37 @@ class CalendarConfigError(Exception):
 
 class _FixedHoliday(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    dia: int = Field(ge=1, le=31)
-    mes: int = Field(ge=1, le=12)
-    nome: str = Field(min_length=1)
+    day: int = Field(alias="dia", ge=1, le=31)
+    month: int = Field(alias="mes", ge=1, le=12)
+    name: str = Field(alias="nome", min_length=1)
 
     @model_validator(mode="after")
     def _valid_date(self) -> "_FixedHoliday":
-        if (self.dia, self.mes) == (29, 2):
+        if (self.day, self.month) == (29, 2):
             raise ValueError("feriado fixo em 29/02 não suportado")
         try:
-            date(2000, self.mes, self.dia)  # ano bissexto: só rejeita datas impossíveis
+            date(2000, self.month, self.day)  # ano bissexto: só rejeita datas impossíveis
         except ValueError:
-            raise ValueError(f"data inválida: {self.dia:02d}/{self.mes:02d}") from None
+            raise ValueError(f"data inválida: {self.day:02d}/{self.month:02d}") from None
         return self
 
 
 class _MovableHoliday(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    nome: str = Field(min_length=1)
-    dias_apos_pascoa: int
+    name: str = Field(alias="nome", min_length=1)
+    days_after_easter: int = Field(alias="dias_apos_pascoa")
 
 
 class MunicipalHolidays(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    revisado_em: date
-    fixos: list[_FixedHoliday]
-    moveis: list[_MovableHoliday] = []
+    reviewed_at: date = Field(alias="revisado_em")
+    fixed: list[_FixedHoliday] = Field(alias="fixos")
+    movable: list[_MovableHoliday] = Field(alias="moveis", default=[])
 
     def for_year(self, year: int) -> dict[date, str]:
-        days = {date(year, h.mes, h.dia): h.nome for h in self.fixos}
-        for m in self.moveis:
-            days[easter(year) + timedelta(days=m.dias_apos_pascoa)] = m.nome
+        days = {date(year, h.month, h.day): h.name for h in self.fixed}
+        for m in self.movable:
+            days[easter(year) + timedelta(days=m.days_after_easter)] = m.name
         return days
 
 
@@ -95,9 +95,9 @@ def black_friday(year: int) -> date:
 
 @dataclass(frozen=True)
 class Notice:
-    kind: Literal["ponto_facultativo", "data_especial"]
+    kind: Literal["optional_day", "special_date"]
     name: str
-    premissa: Literal["P-09", "P-10"]
+    assumption: Literal["P-09", "P-10"]
 
 
 @dataclass(frozen=True)
@@ -137,14 +137,14 @@ class StoreCalendar:
         found: list[Notice] = []
         for name, offset in OPTIONAL_DAYS_WITH_NOTICE:
             if d == easter(d.year) + timedelta(days=offset):
-                found.append(Notice("ponto_facultativo", name, "P-09"))
+                found.append(Notice("optional_day", name, "P-09"))
         if d == black_friday(d.year):
-            found.append(Notice("data_especial", "Black Friday", "P-10"))
+            found.append(Notice("special_date", "Black Friday", "P-10"))
         (start_m, start_d), (end_m, end_d) = CHRISTMAS_PERIOD
         if date(d.year, start_m, start_d) <= d <= date(d.year, end_m, end_d):
-            found.append(Notice("data_especial", "Natal", "P-10"))
+            found.append(Notice("special_date", "Natal", "P-10"))
         if d.month == STORE_ANNIVERSARY_MONTH:
-            found.append(Notice("data_especial", "Aniversário da Loja", "P-10"))
+            found.append(Notice("special_date", "Aniversário da Loja", "P-10"))
         return found
 
     def is_business_day(self, d: date) -> bool:
@@ -160,6 +160,16 @@ class StoreCalendar:
             if self.is_business_day(d):
                 n -= 1
         return d
+
+    def business_days_between(self, start: date, end: date) -> int:
+        """Dias úteis em (start, end]: o dia inicial não conta (P-20)."""
+        n = 0
+        d = start
+        while d < end:
+            d += timedelta(days=1)
+            if self.is_business_day(d):
+                n += 1
+        return n
 
     def _local(self, moment: datetime) -> datetime:
         if moment.tzinfo is None:

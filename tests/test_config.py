@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 import pytest
 
@@ -12,6 +12,8 @@ ENV_VARS = (
     "API_KEY",
     "REFERENCE_DATE",
     "STORE_TZ",
+    "TRACKING_SOURCE",
+    "STALLED_AFTER_BUSINESS_DAYS",
 )
 
 
@@ -32,10 +34,16 @@ def test_defaults_without_env() -> None:
     assert settings.store_tz == "America/Campo_Grande"
 
 
-def test_reference_date_is_parsed(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_reference_date_only_means_10am(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("REFERENCE_DATE", "2025-11-28")
 
-    assert Settings(_env_file=None).reference_date == date(2025, 11, 28)
+    assert Settings(_env_file=None).reference_date == datetime(2025, 11, 28, 10, 0)
+
+
+def test_reference_date_with_time(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("REFERENCE_DATE", "2026-11-26T17:30")
+
+    assert Settings(_env_file=None).reference_date == datetime(2026, 11, 26, 17, 30)
 
 
 def test_empty_values_count_as_unset(monkeypatch: pytest.MonkeyPatch) -> None:

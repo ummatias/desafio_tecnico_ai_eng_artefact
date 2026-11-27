@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 import yaml
-from sqlalchemy import Column, Engine, Integer, MetaData, Table, func, insert, select, text
+from sqlalchemy import Engine, Table, func, insert, select, text
 from sqlalchemy.exc import IntegrityError
 
-from emporio.db.schema import CSV_TABLES, orders, products, promotions
+from emporio.db.schema import CSV_TABLES, orders, products, promotions, tickets
 from emporio.db.seed import CATALOG_REVIEW_FILE, SeedError, load_catalog_review, seed
 from tests.conftest import DATA_DIR, KNOWLEDGE_DIR
 
@@ -45,7 +45,7 @@ def test_inconsistent_flag_matches_catalog_review(seeded_engine: Engine) -> None
     with seeded_engine.connect() as conn:
         flagged = set(
             conn.execute(
-                select(products.c.product_id).where(products.c.cadastro_inconsistente.is_(True))
+                select(products.c.product_id).where(products.c.inconsistent_listing.is_(True))
             ).scalars()
         )
 
@@ -107,10 +107,16 @@ def test_invalid_csv_row_fails_and_writes_nothing(empty_engine: Engine, tmp_path
 
 def test_force_recreates_only_csv_tables(empty_engine: Engine) -> None:
     seed(empty_engine, DATA_DIR, KNOWLEDGE_DIR)
-    tickets = Table("tickets", MetaData(), Column("ticket_id", Integer, primary_key=True))
+    ticket = {
+        "customer_id": 2,
+        "category": "other",
+        "priority": "normal",
+        "summary": "teste",
+        "created_at": "2026-11-27T10:00:00-04:00",
+        "due_at": "2026-11-30T16:00:00-04:00",
+    }
     with empty_engine.begin() as conn:
-        tickets.create(conn)
-        conn.execute(insert(tickets), [{"ticket_id": 1}, {"ticket_id": 2}])
+        conn.execute(insert(tickets), [ticket, ticket])
         conn.execute(products.update().values(stock_quantity=0))
 
     result = seed(empty_engine, DATA_DIR, KNOWLEDGE_DIR, force=True)

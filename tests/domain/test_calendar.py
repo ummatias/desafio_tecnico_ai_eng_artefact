@@ -99,7 +99,7 @@ def test_p09_dec_8_open(cal: StoreCalendar) -> None:
 @pytest.mark.parametrize("d", [date(2026, 2, 16), date(2026, 2, 17)])
 def test_p09_carnaval_regular_hours_with_notice(cal: StoreCalendar, d: date) -> None:
     assert cal.opening_hours(d) == WEEKDAY
-    assert [(n.kind, n.premissa) for n in cal.notices(d)] == [("ponto_facultativo", "P-09")]
+    assert [(n.kind, n.assumption) for n in cal.notices(d)] == [("optional_day", "P-09")]
 
 
 def test_p09_ash_wednesday_no_notice(cal: StoreCalendar) -> None:
@@ -120,10 +120,10 @@ def test_p09_yaml_unknown_key_fails(tmp_path: Path) -> None:
         load_municipal_holidays(path)
 
 
-def _write_fixed(tmp_path: Path, dia: int, mes: int) -> Path:
+def _write_fixed(tmp_path: Path, day: int, month: int) -> Path:
     path = tmp_path / "h.yaml"
     path.write_text(
-        f"revisado_em: 2026-11-27\nfixos:\n  - {{dia: {dia}, mes: {mes}, nome: X}}\n",
+        f"revisado_em: 2026-11-27\nfixos:\n  - {{dia: {day}, mes: {month}, nome: X}}\n",
         encoding="utf-8",
     )
     return path
@@ -149,7 +149,7 @@ def test_p10_black_friday_regular_hours(cal: StoreCalendar) -> None:
     d = date(2026, 11, 27)
     assert black_friday(2026) == d
     assert cal.opening_hours(d) == WEEKDAY
-    assert [(n.name, n.premissa) for n in cal.notices(d)] == [("Black Friday", "P-10")]
+    assert [(n.name, n.assumption) for n in cal.notices(d)] == [("Black Friday", "P-10")]
     assert cal.notices(date(2026, 11, 26)) == []
 
 
@@ -159,7 +159,7 @@ def test_p10_black_friday_rule() -> None:
 
 
 def test_p10_christmas_eve_notice(cal: StoreCalendar) -> None:
-    assert [(n.name, n.premissa) for n in cal.notices(date(2026, 12, 24))] == [("Natal", "P-10")]
+    assert [(n.name, n.assumption) for n in cal.notices(date(2026, 12, 24))] == [("Natal", "P-10")]
     assert cal.notices(date(2026, 12, 1))[0].name == "Natal"
     assert cal.notices(date(2026, 11, 30)) == []
 

@@ -29,7 +29,7 @@ class Product:
     string_count: int | None
     is_electric: bool | None
     normalized_name: str
-    cadastro_inconsistente: bool
+    inconsistent_listing: bool
 
     @property
     def available(self) -> bool:
@@ -73,7 +73,7 @@ def _product(row: RowMapping) -> Product:
         string_count=row["string_count"],
         is_electric=None if is_electric is None else bool(is_electric),
         normalized_name=row["normalized_name"],
-        cadastro_inconsistente=bool(row["cadastro_inconsistente"]),
+        inconsistent_listing=bool(row["inconsistent_listing"]),
     )
 
 
@@ -141,6 +141,17 @@ class CatalogRepository:
         )
         with self._engine.connect() as conn:
             return [Category(**row) for row in conn.execute(query).mappings()]
+
+    def active_promotions(self) -> dict[int, Promotion]:
+        """Promoções ativas por produto (no máximo uma por produto, garantido pelo schema)."""
+        query = select(
+            promotions.c.promotion_id,
+            promotions.c.product_id,
+            promotions.c.discount_percent,
+            promotions.c.description,
+        ).where(promotions.c.is_active.is_(True))
+        with self._engine.connect() as conn:
+            return {row["product_id"]: Promotion(**row) for row in conn.execute(query).mappings()}
 
     def active_promotion(self, product_id: int) -> Promotion | None:
         """A promoção ativa do produto (o schema garante no máximo uma)."""

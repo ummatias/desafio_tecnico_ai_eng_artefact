@@ -68,7 +68,7 @@ products = Table(
     Column("is_electric", Boolean(create_constraint=False)),
     Column("normalized_name", Text, nullable=False),
     Column(
-        "cadastro_inconsistente",
+        "inconsistent_listing",
         Boolean(create_constraint=False),
         nullable=False,
         server_default=text("0"),
@@ -83,7 +83,7 @@ products = Table(
         name="ck_products_strings_type",
     ),
     CheckConstraint("is_electric IS NULL OR is_electric IN (0, 1)", name="ck_products_electric"),
-    CheckConstraint("cadastro_inconsistente IN (0, 1)", name="ck_products_inconsistente"),
+    CheckConstraint("inconsistent_listing IN (0, 1)", name="ck_products_inconsistent_listing"),
 )
 Index("ix_products_category_id", products.c.category_id)
 Index("ix_products_status_stock", products.c.status, products.c.stock_quantity)
@@ -157,3 +157,27 @@ order_items = Table(
 )
 
 CSV_TABLES: tuple[Table, ...] = (categories, customers, products, promotions, orders, order_items)
+
+# Tabelas da aplicação: o seed cria se faltarem e nunca apaga (D-16). Sem FK para as tabelas dos
+# CSVs, para o `--force` conseguir recriá-las (D-39).
+TICKET_CATEGORIES: tuple[str, ...] = ("complaint", "exchange", "order_delay", "other")
+TICKET_PRIORITIES: tuple[str, ...] = ("normal", "high")
+
+tickets = Table(
+    "tickets",
+    metadata,
+    Column("ticket_id", Integer, primary_key=True, autoincrement=True),
+    Column("customer_id", Integer),
+    Column("order_id", Integer),
+    Column("category", Text, nullable=False),
+    Column("priority", Text, nullable=False),
+    Column("summary", Text, nullable=False),
+    Column("stated_receipt_date", Date),
+    # ISO 8601 com fuso: o SQLite não guarda tzinfo em DateTime
+    Column("created_at", Text, nullable=False),
+    Column("due_at", Text, nullable=False),
+    CheckConstraint(_in("category", TICKET_CATEGORIES), name="ck_tickets_category"),
+    CheckConstraint(_in("priority", TICKET_PRIORITIES), name="ck_tickets_priority"),
+)
+
+APP_TABLES: tuple[Table, ...] = (tickets,)
