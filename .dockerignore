@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+var
+.env
+**/__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+dist
+build
+Desafio Técnico AI Engineer 2026
+docs/*
+!docs/assumptions.md
+context.md
+IMPLEMENTATION_PLAN.md
+tests
