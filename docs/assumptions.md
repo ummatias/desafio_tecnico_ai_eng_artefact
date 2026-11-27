@@ -5,8 +5,8 @@ Leituras adotadas onde o Manual de Políticas ([`knowledge/policies.md`](../know
 
 **Onde há premissa, ela prevalece sobre a leitura literal.**
 
-Cada premissa aponta para o teste que a fixa, a partir da implementa a regra. Até lá, o
-campo diz `pendente`.
+Cada premissa aponta para o teste que a fixa, que implementa a regra. 
+Até lá, o campo diz `pendente`.
 
 **Status:** `adotada`, ou `a confirmar pela loja`
 
@@ -27,7 +27,7 @@ Motivo: o §4.2 manda acionar o fabricante após 30 dias, mas o §8.1 (CDC) gara
 ID: P-02
 Seção: §5.1, §3.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_cart.py::test_p02_exact_limits_favour_customer_freight, tests/domain/test_cart.py::test_p02_exact_limits_favour_customer
 Premissa: pedido de exatamente R$ 500,00 tem frete grátis, compra de exatamente R$ 2.000,00 permite combinar formas de pagamento.
 Motivo: o manual diz "acima de R$ 500,00" (grátis) e "abaixo de R$ 500,00" (R$ 35,00), sem cobrir o valor exato, e "acima de R$ 2.000,00" para a combinação. Na dúvida, a leitura favorável ao cliente.
 
@@ -35,7 +35,7 @@ Motivo: o manual diz "acima de R$ 500,00" (grátis) e "abaixo de R$ 500,00" (R$ 
 ID: P-03
 Seção: §5.1, §3.1, §6.2
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_cart.py::test_p03_limits_use_price_after_promotion_before_pix
 Premissa: os dois limites usam o valor dos produtos depois das promoções e antes do desconto PIX.
 Motivo: o manual não define a base. O valor promocional é o preço de venda (§6.2), o PIX é uma forma de pagamento escolhida depois, e não deve tirar do cliente o frete grátis.
 
@@ -43,7 +43,7 @@ Motivo: o manual não define a base. O valor promocional é o preço de venda (�
 ID: P-04
 Seção: §3, §6.2
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_cart.py::test_p04_pix_discount_only_on_non_promotional_items, tests/domain/test_pricing.py::test_p04_no_pix_on_promotional_item
 Premissa: num carrinho misto, os 5% do PIX incidem só sobre os itens sem promoção ativa.
 Motivo: §6.2: "O desconto de PIX (5%) não se aplica sobre preços já promocionais", a regra é por item.
 
@@ -51,7 +51,7 @@ Motivo: §6.2: "O desconto de PIX (5%) não se aplica sobre preços já promocio
 ID: P-05
 Seção: §3.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_installments.py::test_p05_truncate_remainder_on_first
 Premissa: parcelas iguais truncadas ao centavo, o resto vai na primeira. R$ 459,90 em 12x = 1 × R$ 38,38 + 11 × R$ 38,32. O mínimo do §3.1 é verificado na menor parcela. Quando os valores diferem, o agente mostra os dois.
 Motivo: o manual não define o arredondamento. Truncar e somar o resto na primeira fecha o total exato e é a prática comum de parcelamento.
 
@@ -59,7 +59,7 @@ Motivo: o manual não define o arredondamento. Truncar e somar o resto na primei
 ID: P-06
 Seção: §3.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_installments.py::test_p06_minimum_50_up_to_3x
 Premissa: "sem valor mínimo de parcela (exceto abaixo de R$ 50,00)" = parcela mínima de R$ 50,00 em 2x e 3x. Em 1x não há mínimo.
 Motivo: a frase se contradiz ("sem mínimo, exceto abaixo de R$ 50"), a única leitura que dá efeito à exceção é um mínimo de R$ 50.
 
@@ -67,7 +67,7 @@ Motivo: a frase se contradiz ("sem mínimo, exceto abaixo de R$ 50"), a única l
 ID: P-07
 Seção: §3, §3.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_installments.py::test_p07_section_3_1_overrides_payment_table
 Premissa: vale o §3.1 (R$ 50 / R$ 80 / R$ 100 por faixa), não a "Parcela mínima de R$ 100,00" da tabela do §3.
 Motivo: o §3.1 é a regra específica de parcelamento, a tabela resume a faixa mais alta.
 
@@ -91,7 +91,10 @@ Motivo: o §2 fecha a loja "em feriados" sem listá-los. Fontes no YAML (JFMS, c
 ID: P-10
 Seção: §2
 Status: a confirmar pela loja (períodos de Natal e Aniversário)
-Premissa: não há dados de horário estendido. Nas datas especiais do §2, o agente informa o horário normal e diz que horários especiais são comunicados nas redes sociais e no WhatsApp. Períodos: Black Friday = sexta após a 4ª quinta de novembro (2026: 27/11); Natal = 01/12 a 24/12; Aniversário da Loja = agosto inteiro (§6.1, sem dia). O aviso vale também em dia fechado. Caso de eval: "amanhã abrem até que horas?" perguntado na quinta, 26/11.
+Premissa: não há dados de horário estendido. Nas datas especiais do §2, o agente informa o horário normal e diz que horários especiais são comunicados nas redes sociais e no WhatsApp. Períodos: Black Friday = sexta após a 4ª quinta de novembro (2026: 27/11); Natal = 01/12 a 24/
+12; Aniversário da Loja = agosto inteiro (§6.1, sem dia). O aviso vale também em dia fechado. Caso de eval: "amanhã abrem até que horas?" 
+perguntado na quinta, 26/11.
+Teste: tests/domain/test_calendar.py::test_p10_black_friday_regular_hours, tests/domain/test_calendar.py::test_p10_christmas_eve_notice
 Motivo: o §2 diz que o horário "pode ser estendido" e que as alterações são comunicadas com antecedência, sem a comunicação, vale o horário regular.
 
 ### P-11 · Canal de venda
@@ -106,7 +109,7 @@ Motivo: os pedidos têm rastreio e previsão de entrega, o que indica venda a di
 ID: P-12
 Seção: §5.1, §5.2
 Status: a confirmar pela loja
-Teste: pendente
+Teste: tests/domain/test_cart.py::test_p12_metro_region_is_campo_grande, tests/domain/test_cart.py::test_p12_other_cities_a_calcular
 Premissa: "região metropolitana" = clientes com cidade Campo Grande. As demais cidades dos dados (Dourados, Corumbá, Ponta Porã, Três Lagoas) seguem o §5.2.
 Motivo: o manual não lista os municípios, nenhuma outra cidade dos dados fica na região de Campo Grande.
 
@@ -154,7 +157,7 @@ Motivo: o recebimento não está nos dados, as previsões contradizem o §5.1 (`
 ID: P-18
 Seção: §5.2
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_cart.py::test_p18_no_freight_value_outside_campo_grande; pendente
 Premissa: sem tabela de valores, o agente não informa um valor de frete para outras cidades. Diz que o frete é calculado pelo CEP, peso e dimensões, e que itens de grande porte podem exigir cotação individual.
 Motivo: o §5.2 dá só prazos e modalidades, não há CEP nem tarifas nos dados.
 
@@ -181,3 +184,19 @@ Status: adotada
 Teste: pendente
 Premissa: os dados não dizem se houve setup sob encomenda nem aviso de "venda final". O agente pergunta ao cliente e, se a resposta for sim, encaminha à equipe. A exclusão de boquilhas não tem efeito enquanto as categorias 6 e 7 (sopros) estiverem vazias.
 Motivo: negar a troca sem dado seria uma decisão sem fonte confiável, ignorar o §4.4 seria conceder um direito que o manual exclui.
+
+### P-22 · Arredondamento dos descontos
+ID: P-22
+Seção: §3, §6.2, §7.1
+Status: adotada
+Teste: tests/domain/test_pricing.py::test_p22_pix_truncates_discount, tests/domain/test_pricing.py::test_p22_active_promotions_exact, tests/domain/test_pricing.py::test_p22_hypothetical_12_percent, tests/domain/test_cart.py::test_p22_cart_rounds_per_unit
+Premissa: em todo desconto percentual (PIX e promoção), o desconto é truncado ao centavo e o preço final arredonda para cima: R$ 449,90 no PIX = R$ 427,41. No carrinho, arredonda por unidade, multiplica pela quantidade e soma (2 × 427,41 = 854,82, não 854,81).
+Motivo: o manual não define o arredondamento. É o mesmo critério da P-05 e nunca anuncia desconto maior que o da política (§7.1, "propaganda enganosa"). O preço por unidade que o agente cita fecha com o total da linha.
+
+### P-23 · Frete no parcelamento
+ID: P-23
+Seção: §3.1, §5.1
+Status: adotada
+Teste: tests/domain/test_cart.py::test_p23_installments_include_freight
+Premissa: as parcelas cobrem produtos + frete, e os mínimos do §3.1 são verificados sobre esse total (R$ 459,90 + R$ 35,00 = R$ 494,90 permite 6x de R$ 82,48). O PIX nunca desconta o frete. Fora de Campo Grande o frete não tem valor (P-18): as parcelas cobrem só os produtos, com o aviso de frete a calcular.
+Motivo: o manual é omisso; no cartão o cliente paga o pedido inteiro, frete incluído. O desconto PIX é "sobre o preço de tabela" (§3), que não inclui o frete.
