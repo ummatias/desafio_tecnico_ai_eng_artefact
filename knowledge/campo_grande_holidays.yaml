@@ -1,0 +1,19 @@
+# Feriados municipais de Campo Grande - a confirmar pela loja (P-09).
+#
+# Fontes:
+# - JFMS, Portaria SADM-MS nº 151/2023 (calendário 2024: 13/06 e 26/08):
+#   https://www.jfms.jus.br/documentos/portarias/Portaria_SADMMS_151.pdf
+# - Correio do Estado, feriados 2025 (Corpus Christi é feriado em Campo Grande):
+#   https://correiodoestado.com.br/cidades/confira-os-feriados-que-ms-tera-em-2025/436467/
+#
+# Candidato, não incluído: 08/12 (N. Sra. da Conceição). Citado em
+# https://correiodoestado.com.br/cidades/campo-grande-tera-xx-feriados-em-2025/440860/
+# (2025), sem a lei municipal e sem dizer se é feriado decretado ou só data comemorativa.
+#
+# Feriados nacionais e de MS vêm da biblioteca `holidays`.
+revisado_em: 2026-11-27
+fixos:
+  - {dia: 13, mes: 6, nome: "Santo Antônio (padroeiro)"}
+  - {dia: 26, mes: 8, nome: "Aniversário de Campo Grande"}
+moveis:
+  - {nome: "Corpus Christi", dias_apos_pascoa: 60}

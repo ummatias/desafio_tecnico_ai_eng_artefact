@@ -11,6 +11,9 @@ dependencies = [
     "pydantic-settings>=2.6",
     "sqlalchemy>=2.0",
     "pyyaml>=6.0",
+    "holidays>=0.109",
+    "python-dateutil>=2.9.0.post0",
+    "tzdata>=2026.6",
 ]
 
 [dependency-groups]
@@ -20,6 +23,7 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "types-pyyaml>=6.0.12.20261122",
+    "types-python-dateutil>=2.9.0.20261122",
 ]
 
 [build-system]
