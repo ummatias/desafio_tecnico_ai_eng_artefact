@@ -19,7 +19,7 @@ Premissa, Motivo.
 ID: P-01
 Seção: §4.2, §8.1, §8.2
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_exchange.py::test_p01_defect_within_90_days_of_receipt_escalates, tests/domain/test_exchange.py::test_defect_30_days_from_purchase
 Premissa: defeito em até 30 dias corridos da compra → troca pela loja (§4.2), decidida sem data de recebimento. Depois disso, e em até 90 dias do recebimento → garantia legal (§8.1): registrar e escalar, **nunca** "só com o fabricante". Depois dos 90 dias → garantia do fabricante (§8.2), com a loja podendo intermediar.
 Motivo: o §4.2 manda acionar o fabricante após 30 dias, mas o §8.1 (CDC) garante 90 dias a partir do recebimento. A garantia legal não pode ser negada pelo manual.
 
@@ -101,7 +101,7 @@ Motivo: o §2 diz que o horário "pode ser estendido" e que as alterações são
 ID: P-11
 Seção: §4.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_exchange.py::test_p11_regret_applies_to_all_orders
 Premissa: os pedidos não informam o canal, todos são tratados como compras online, e o direito de arrependimento (§4.1) se aplica.
 Motivo: os pedidos têm rastreio e previsão de entrega, o que indica venda a distância, na dúvida, a leitura favorável ao cliente.
 
@@ -141,7 +141,7 @@ Motivo: é a leitura literal de "horas úteis" e a mais segura para a promessa a
 ID: P-16
 Seção: §4.3
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_exchange.py::test_p16_preference_counts_from_receipt
 Premissa: os 7 dias da troca por preferência contam a partir do recebimento, sujeitos ao estoque do produto desejado, consultado na hora.
 Motivo: o §4.3 diz "em até 7 dias" sem marco, o recebimento é o marco do caso análogo (§4.1) e o único em que o cliente já pode avaliar o produto.
 
@@ -149,7 +149,7 @@ Motivo: o §4.3 diz "em até 7 dias" sem marco, o recebimento é o marco do caso
 ID: P-17
 Seção: §4.1, §4.3, §8.1
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_exchange.py::test_p17_stated_date_never_decides
 Premissa: só uma fonte confiável (evento de entrega da transportadora) decide um prazo contado do recebimento. A previsão (`estimated_delivery`) e a data informada pelo cliente só encaminham o caso, a data informada vai para o ticket.
 Motivo: o recebimento não está nos dados, as previsões contradizem o §5.1 (`docs/data_quality_report.md`, A02). Uma data informada ("recebi ontem") não pode conceder nem negar um direito.
 
@@ -181,9 +181,9 @@ Motivo: "dia útil" tem o sentido usual bancário e de prazos, "horas úteis" de
 ID: P-21
 Seção: §4.4
 Status: adotada
-Teste: pendente
-Premissa: os dados não dizem se houve setup sob encomenda nem aviso de "venda final". O agente pergunta ao cliente e, se a resposta for sim, encaminha à equipe. A exclusão de boquilhas não tem efeito enquanto as categorias 6 e 7 (sopros) estiverem vazias.
-Motivo: negar a troca sem dado seria uma decisão sem fonte confiável, ignorar o §4.4 seria conceder um direito que o manual exclui.
+Teste: tests/domain/test_exchange.py::test_p21_asks_when_window_open, tests/domain/test_exchange.py::test_p21_no_questions_when_window_closed, tests/domain/test_exchange.py::test_p21_mouthpiece_only_for_wind_categories
+Premissa: os dados não dizem se houve setup sob encomenda nem aviso de "venda final". Com o prazo aberto, o agente pergunta (e, só para as categorias 6 e 7, se envolve boquilha); com o prazo encerrado, não pergunta. O efeito da resposta "sim" segue a P-25. A exclusão de boquilhas não tem efeito enquanto as categorias 6 e 7 (sopros) estiverem vazias.
+Motivo: negar a troca sem dado seria uma decisão sem fonte confiável; ignorar o §4.4 seria conceder um direito que o manual exclui. Perguntar com o prazo encerrado só alongaria a conversa.
 
 ### P-22 · Arredondamento dos descontos
 ID: P-22
@@ -200,3 +200,19 @@ Status: adotada
 Teste: tests/domain/test_cart.py::test_p23_installments_include_freight
 Premissa: as parcelas cobrem produtos + frete, e os mínimos do §3.1 são verificados sobre esse total (R$ 459,90 + R$ 35,00 = R$ 494,90 permite 6x de R$ 82,48). O PIX nunca desconta o frete. Fora de Campo Grande o frete não tem valor (P-18): as parcelas cobrem só os produtos, com o aviso de frete a calcular.
 Motivo: o manual é omisso; no cartão o cliente paga o pedido inteiro, frete incluído. O desconto PIX é "sobre o preço de tabela" (§3), que não inclui o frete.
+
+### P-24 · A data da compra concede, nunca nega
+ID: P-24
+Seção: §4.1, §4.3, §8.1
+Status: adotada
+Teste: tests/domain/test_exchange.py::test_p24_purchase_date_grants_never_denies, tests/domain/test_exchange.py::test_p24_purchase_boundaries, tests/domain/test_exchange.py::test_p24_defect_100_days_without_tracking
+Premissa: o recebimento é sempre igual ou posterior à compra. Se a compra foi há no máximo 7 dias (§4.1, §4.3) ou 90 dias (§8.1), o prazo contado do recebimento certamente está aberto: o agente conclui `eligible` sem rastreio. Encerrar um prazo (`expired`, inclusive a garantia do fabricante) exige o evento de entrega do rastreio; sem ele, `to_confirm`.
+Motivo: a data da compra é confiável (P-17) e dá um limite seguro só num sentido. Reduz os `to_confirm` sem que uma data incerta negue um direito.
+
+### P-25 · Alcance do §4.4
+ID: P-25
+Seção: §4.1, §4.2, §4.3, §4.4, §8.1
+Status: a confirmar pela loja
+Teste: tests/domain/test_exchange.py::test_p25_preference_final_sale_not_eligible, tests/domain/test_exchange.py::test_p25_regret_custom_setup_escalates, tests/domain/test_exchange.py::test_p25_defect_ignores_4_4
+Premissa: o §4.4 bloqueia só a troca por preferência (§4.3): um "sim" dá `not_eligible`, sem escalar. No arrependimento (§4.1), o §4.4 não nega: um "sim" encaminha o caso à equipe (`to_confirm`). No defeito (§4.2) e na garantia legal (§8.1), o §4.4 não se aplica e não é perguntado; as exclusões de defeito são as do §4.2 e do §8.3.
+Motivo: a troca por preferência é cortesia da loja; o arrependimento (CDC art. 49) e a garantia legal contra defeito de fabricação não podem ser afastados pelo manual.
