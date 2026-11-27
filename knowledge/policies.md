@@ -92,7 +92,7 @@ Página 3.
 > | Boleto Bancário | Pagamento à vista | Compensação em até 3 dias úteis |
 
 **Marco:** boleto compensado em até 3 dias úteis a partir do pagamento (dia útil: P-20).
-**Premissas:** P-04, P-07, P-20.
+**Premissas:** P-04, P-07, P-20, P-22.
 
 ## 3.1 Regras de Parcelamento
 
@@ -104,7 +104,7 @@ Página 3.
 > - Combinação de formas de pagamento: permitida (ex.: PIX + cartão) para compras acima de
 >   R$ 2.000,00.
 
-**Premissas:** P-02, P-03, P-05, P-06, P-07.
+**Premissas:** P-02, P-03, P-05, P-06, P-07, P-23.
 
 ## 4 Política de Trocas e Devoluções
 
@@ -182,7 +182,7 @@ Página 4.
 >   entrega.
 
 **Marco:** 1 a 3 dias úteis (P-20). O manual não diz quando o prazo começa.
-**Premissas:** P-02, P-03, P-12, P-20.
+**Premissas:** P-02, P-03, P-12, P-20, P-23.
 
 ## 5.2 Entregas para Outras Cidades
 
@@ -232,7 +232,7 @@ Página 6.
 > - Queima de Estoque: promoções pontuais para renovação de catálogo.
 > - Semana do Músico: promoções na semana do Dia do Músico (22 de novembro).
 
-**Premissas:** P-10, P-19.
+**Premissas:** P-10, P-19, P-22.
 
 ## 6.2 Regras de Promoções
 
@@ -247,7 +247,7 @@ Página 6.
 > **Comunicação:** preços promocionais devem sempre ser apresentados junto ao preço original e o
 > percentual de desconto, para total transparência ao cliente.
 
-**Premissas:** P-03, P-04.
+**Premissas:** P-03, P-04, P-22.
 
 ## 7 Atendimento via WhatsApp
 
