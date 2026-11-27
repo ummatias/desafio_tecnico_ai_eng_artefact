@@ -120,6 +120,27 @@ def test_p09_yaml_unknown_key_fails(tmp_path: Path) -> None:
         load_municipal_holidays(path)
 
 
+def _write_fixed(tmp_path: Path, dia: int, mes: int) -> Path:
+    path = tmp_path / "h.yaml"
+    path.write_text(
+        f"revisado_em: 2026-11-27\nfixos:\n  - {{dia: {dia}, mes: {mes}, nome: X}}\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_p09_yaml_impossible_date_fails(tmp_path: Path) -> None:
+    path = _write_fixed(tmp_path, 31, 2)
+    with pytest.raises(CalendarConfigError, match=r"h\.yaml(.|\n)*data inválida: 31/02"):
+        load_municipal_holidays(path)
+
+
+def test_p09_yaml_feb_29_rejected(tmp_path: Path) -> None:
+    path = _write_fixed(tmp_path, 29, 2)
+    with pytest.raises(CalendarConfigError, match="29/02 não suportado"):
+        load_municipal_holidays(path)
+
+
 # P-10: datas especiais
 
 

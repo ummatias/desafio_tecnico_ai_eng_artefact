@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 import holidays
 import yaml
 from dateutil.easter import easter
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 DEFAULT_TZ = ZoneInfo("America/Campo_Grande")
 
@@ -47,6 +47,16 @@ class _FixedHoliday(BaseModel):
     dia: int = Field(ge=1, le=31)
     mes: int = Field(ge=1, le=12)
     nome: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _valid_date(self) -> "_FixedHoliday":
+        if (self.dia, self.mes) == (29, 2):
+            raise ValueError("feriado fixo em 29/02 não suportado")
+        try:
+            date(2000, self.mes, self.dia)  # ano bissexto: só rejeita datas impossíveis
+        except ValueError:
+            raise ValueError(f"data inválida: {self.dia:02d}/{self.mes:02d}") from None
+        return self
 
 
 class _MovableHoliday(BaseModel):
