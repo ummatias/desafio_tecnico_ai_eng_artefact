@@ -83,16 +83,15 @@ Motivo: os pedidos 9–16 estão abertos há meses sem previsão (`docs/data_qua
 ID: P-09
 Seção: §2
 Status: a confirmar pela loja (calendário municipal de Campo Grande)
-Teste: pendente
-Premissa: feriados nacionais e de MS pela biblioteca `holidays`, e os de Campo Grande num YAML a conferir com o calendário oficial. Carnaval e Corpus Christi são pontos facultativos: o agente informa o horário normal e sugere confirmar pelo WhatsApp.
-Motivo: o §2 fecha a loja "em feriados" sem listá-los, pontos facultativos não são feriados.
+Teste: tests/domain/test_calendar.py::test_p09_campo_grande_holidays_closed, tests/domain/test_calendar.py::test_p09_carnaval_regular_hours_with_notice, tests/domain/test_calendar.py::test_p09_ash_wednesday_no_notice, tests/domain/test_calendar.py::test_p09_other_optional_days_no_notice, tests/domain/test_calendar.py::test_p09_dec_8_open
+Premissa: loja fechada nos feriados nacionais e de MS (biblioteca `holidays`) e nos de Campo Grande (`knowledge/campo_grande_holidays.yaml`): 13/06 (Santo Antônio), 26/08 (Aniversário da cidade) e Corpus Christi (data móvel, Páscoa + 60 dias). Único ponto facultativo com aviso: Carnaval (segunda e terça), com horário normal e "confirme pelo WhatsApp". Quarta de Cinzas, 28/10 e 31/12 são dias normais, sem aviso. 08/12 (N. Sra. da Conceição) é candidato, não incluído.
+Motivo: o §2 fecha a loja "em feriados" sem listá-los. Fontes no YAML (JFMS, calendário 2024; Correio do Estado, 2025). Ponto facultativo não é feriado; o Carnaval é o único com dúvida real sobre o comércio.
 
 ### P-10 · Datas especiais
 ID: P-10
 Seção: §2
-Status: adotada
-Teste: pendente
-Premissa: não há dados de horário estendido. Na Black Friday de 2026 (sexta, 27/11), o agente informa o horário normal de sexta (9h às 18h) e diz que horários especiais são comunicados nas redes sociais e no WhatsApp. Caso de eval: "amanhã abrem até que horas?" perguntado na quinta, 26/11.
+Status: a confirmar pela loja (períodos de Natal e Aniversário)
+Premissa: não há dados de horário estendido. Nas datas especiais do §2, o agente informa o horário normal e diz que horários especiais são comunicados nas redes sociais e no WhatsApp. Períodos: Black Friday = sexta após a 4ª quinta de novembro (2026: 27/11); Natal = 01/12 a 24/12; Aniversário da Loja = agosto inteiro (§6.1, sem dia). O aviso vale também em dia fechado. Caso de eval: "amanhã abrem até que horas?" perguntado na quinta, 26/11.
 Motivo: o §2 diz que o horário "pode ser estendido" e que as alterações são comunicadas com antecedência, sem a comunicação, vale o horário regular.
 
 ### P-11 · Canal de venda
@@ -131,8 +130,8 @@ Motivo: o §7.1 diz "sugerir lojas parceiras quando possível", mas o manual e o
 ID: P-15
 Seção: §7.3
 Status: adotada
-Teste: pendente
-Premissa: "24 horas úteis" = horas com a loja aberta: seg–sex 9h–18h (9 h/dia), sáb 9h–13h (4 h), domingos e feriados não contam, Carnaval e Corpus Christi contam como dias normais (P-09). Fora do expediente, a contagem começa na próxima abertura. O agente informa o dia e a hora calculados ("até quarta, 10h"), nunca "24 horas úteis".
+Teste: tests/domain/test_calendar.py::test_p15_add_business_hours, tests/domain/test_calendar.py::test_p15_ends_at_closing_time, tests/domain/test_calendar.py::test_p15_corpus_christi_skipped
+Premissa: "24 horas úteis" = horas com a loja aberta: seg–sex 9h–18h (9 h/dia), sáb 9h–13h (4 h), domingos e feriados não contam, Carnaval conta como dia normal e Corpus Christi é feriado municipal (P-09). Se a contagem termina no fechamento, o prazo é o fechamento. Fora do expediente, a contagem começa na próxima abertura. O agente informa o dia e a hora calculados ("até quarta, 10h"), nunca "24 horas úteis".
 Motivo: é a leitura literal de "horas úteis" e a mais segura para a promessa ao cliente. Casos do teste: sex 17:00 → qua 10:00 (1 + 4 + 9 + 9 + 1), sáb 15:00 ou dom → começa seg 09:00 → qua 15:00, sáb 12:00 → qua 14:00, feriado no meio é pulado, Carnaval conta como dia normal.
 
 ### P-16 · Marco da troca por preferência
@@ -171,7 +170,7 @@ Motivo: o §7.3 manda verificar se a promoção está ativa e nunca prometer des
 ID: P-20
 Seção: §3, §4.1, §5.1, §7.3
 Status: adotada
-Teste: pendente
+Teste: tests/domain/test_calendar.py::test_p20_business_days_exclude_saturday
 Premissa: "dia útil" = segunda a sexta, sem feriados (compensação do boleto §3, reembolso §4.1, entrega §5.1, P-08). "Horas úteis" (P-15) = horas de loja aberta, **com sábado**. A diferença é intencional.
 Motivo: "dia útil" tem o sentido usual bancário e de prazos, "horas úteis" de atendimento segue o horário da loja (§2), que abre no sábado.
 
