@@ -45,3 +45,13 @@ def test_no_promotion_keeps_list_price() -> None:
 def test_invalid_percent(percent: int) -> None:
     with pytest.raises(ValueError, match="percent"):
         apply_discount(10_000, percent)
+
+
+def test_promotional_price_rejects_negative_without_discount() -> None:
+    with pytest.raises(ValueError, match="price_cents"):
+        promotional_price(-1, None)
+
+
+def test_pix_price_rejects_negative_with_promotion() -> None:
+    with pytest.raises(ValueError, match="price_cents"):
+        pix_price(-1, has_promotion=True)
