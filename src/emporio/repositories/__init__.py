@@ -3,6 +3,7 @@
 from emporio.repositories.catalog import CatalogRepository, Category, Product, Promotion
 from emporio.repositories.customers import Customer, CustomerRepository
 from emporio.repositories.orders import Order, OrderItem, OrderRepository
+from emporio.repositories.tickets import Ticket, TicketRepository
 
 __all__ = [
     "CatalogRepository",
@@ -14,4 +15,6 @@ __all__ = [
     "OrderRepository",
     "Product",
     "Promotion",
+    "Ticket",
+    "TicketRepository",
 ]
