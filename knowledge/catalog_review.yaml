@@ -1,0 +1,49 @@
+# Produtos com cadastro inconsistente (nome, descrição e specs se contradizem).
+#
+# Preenche products.cadastro_inconsistente a partir desta lista;
+#
+# Argumento comum ao lote 135–144: as specs são um molde repetido, contradito onde a descrição
+# informa o material, e o nome genérico não identifica o modelo.
+
+revisado_em: 2026-11-27
+
+produtos:
+  - id: 135
+    motivo: >-
+      Nome Music Man, descrição de um Fender Jazz Bass com corpo em Alder; specs dizem corpo
+      Ash (molde 135–138).
+  - id: 136
+    motivo: >-
+      Nome Ibanez, descrição cita Precision (modelo Fender); specs do molde 135–138
+      (Ash/Maple/4).
+  - id: 137
+    motivo: >-
+      Nome Yamaha, descrição de um baixo Ibanez de 5 cordas; specs dizem 4 cordas.
+  - id: 138
+    motivo: >-
+      Specs do molde 135–138 (Ash/Maple/4), os mesmos valores de baixos cujas descrições os
+      contradizem; o nome genérico "Bass 4X" não identifica o modelo que a descrição informa
+      (StingRay).
+  - id: 139
+    motivo: >-
+      Nome Yamaha, descrição de uma Pearl Export com cascos em Poplar; specs dizem Maple
+      (molde 139–141).
+  - id: 140
+    motivo: >-
+      Nome Pearl, descrição de uma Tama com cascos 100% Birch; specs dizem Maple (molde 139–141).
+  - id: 141
+    motivo: >-
+      Specs do molde 139–141 (Maple/5), contradito pelo material informado em 139 (Poplar) e
+      140 (Birch); o nome genérico "Kit 3 Studio" não identifica o modelo da descrição
+      (Stage Custom).
+  - id: 142
+    motivo: >-
+      Nome Korg, descrição de uma workstation Roland de 88 teclas; specs dizem 61 teclas.
+  - id: 143
+    motivo: >-
+      Specs do molde 142–144 (61 teclas/128/Synthesizer); a descrição é de um piano de palco
+      (Nord Stage), não de um sintetizador; o nome genérico "Synth 2 Pro" não identifica o
+      modelo.
+  - id: 144
+    motivo: >-
+      Nome Roland, descrição de um teclado arranjador Yamaha; specs dizem Synthesizer.

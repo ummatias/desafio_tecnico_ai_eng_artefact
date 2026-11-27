@@ -2,6 +2,7 @@
 
 from datetime import date
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -19,6 +20,9 @@ class Settings(BaseSettings):
     llm_model: str = "openai/gpt-oss-120b"
 
     database_url: str = "sqlite:///var/emporio.db"
+    # CSVs originais (somente leitura) e base de conhecimento curada
+    data_dir: Path = Path("data")
+    knowledge_dir: Path = Path("knowledge")
     # Sem valor, as requisições externas não exigem autenticação.
     api_key: SecretStr | None = None
     # Data "de hoje" usada por toda regra que depende de tempo. Vazio = data real em STORE_TZ.
