@@ -1,0 +1,14 @@
+id: horario-amanha-black-friday
+category: hours
+# Quinta 26/11/2026; sexta 27/11 é Black Friday: horário normal 09:00 às 18:00 e aviso de que
+# horários especiais saem nas redes sociais e no WhatsApp.
+source: "§2, P-10"
+reference_date: 2026-11-26T10:00
+session: {phone: null}
+turns:
+  - user: "amanhã vocês abrem até que horas?"
+    expected_facts:
+      - any_of: ["18:00", "18h", "18 h"]
+      - "redes sociais"
+    must_not_include: ["fechad"]
+should_escalate: false

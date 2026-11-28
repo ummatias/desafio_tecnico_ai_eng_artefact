@@ -1,0 +1,11 @@
+id: parcelas-12x-promocao
+category: payment
+# Taylor 110e R$ 5.999,00 com 8% (desconto 479,92) = R$ 5.519,08; mostrar preço original e
+# percentual (§6.2). 12x: 5.519,08 / 12 = 459,92 truncado, resto 0,04 na 1ª (R$ 459,96).
+source: "§3.1, §6.2, P-05, P-22"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "o violão taylor 110e dá pra fazer em 12x? qual o valor?"
+    expected_facts: ["R$ 5.519,08", "R$ 5.999,00", "8%", "12x", "459,92"]
+should_escalate: false

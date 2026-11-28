@@ -1,0 +1,13 @@
+id: pedido-8-atraso
+category: order
+# Pedido 8 da Ana: enviado, previsão 28/02/2026; em 26/11/2026 são 271 dias de atraso.
+# Não foi entregue: nada de "entregue".
+source: "§7.1, P-17"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "oi, cadê meu pedido 8?"
+    expected_facts: ["28/02/2026", "271"]
+    must_not_include: ["foi entregue em", "pedido entregue"]
+expected_tools: [get_order]
+should_escalate: null

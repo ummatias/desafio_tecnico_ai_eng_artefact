@@ -1,0 +1,21 @@
+id: pedido-parado
+category: order
+# Pedido 9 da Juliana: confirmed desde 20/02/2026, sem envio: parado (P-08). Reconhecer o
+# atraso, não dizer só "está em processamento".
+source: "P-08, P-20"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99234-5678"}
+turns:
+  - user: "meu pedido 9 ainda não chegou, o que aconteceu?"
+    expected_facts:
+      - any_of:
+          - "parado"
+          - "parada"
+          - "atras"
+          - "sem atualiza"
+          - "demorando"
+          - "não foi enviado"
+          - "não saiu"
+          - "ainda não foi despachado"
+expected_tools: [get_order]
+should_escalate: null

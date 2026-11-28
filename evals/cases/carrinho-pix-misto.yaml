@@ -1,0 +1,15 @@
+id: carrinho-pix-misto
+category: payment
+# Takamine GD20 R$ 2.199,00 (sem promoção) + Crafter HT-100 R$ 2.399,00 com 18%
+# (desconto 431,82 -> R$ 1.967,18). PIX só no GD20: 2.199,00 - 109,95 = 2.089,05.
+# Total no PIX: 2.089,05 + 1.967,18 = R$ 4.056,23. PIX também no item em promoção (errado):
+# (2.199,00 + 1.967,18) x 0,95 = R$ 3.957,87.
+source: "§3, §6.2, P-03, P-04, P-22"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quanto fica o takamine gd20 junto com o crafter ht-100 pagando no pix?"
+    expected_facts: ["R$ 4.056,23"]
+    must_not_include: ["R$ 3.957,87"]
+expected_tools: [quote_cart]
+should_escalate: false

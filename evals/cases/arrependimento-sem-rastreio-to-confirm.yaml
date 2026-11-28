@@ -1,0 +1,15 @@
+id: arrependimento-sem-rastreio-to-confirm
+category: exchange
+# Pedido 5 (compra 05/01/2026), sem rastreio. 14 dias após a compra: a compra não garante o
+# prazo de 7 dias do recebimento, e sem evento de entrega nada o encerra -> to_confirm e
+# chamado. Retorno: seg 19/01 10:00 + 24 horas úteis = 8 h (seg) + 9 h (ter) + 7 h (qua)
+# = 21/01/2026 às 16:00.
+source: "§4.1, §7.3, P-15, P-17, P-24"
+reference_date: 2026-01-19T10:00
+session: {phone: "(67) 98765-4321", tracking_source: none}
+turns:
+  - user: "oi, comprei um violão no pedido 5 e me arrependi, quero devolver"
+    expected_facts: ["EMP-20260119-", "21/01/2026"]
+expected_tools: [check_exchange, escalate_to_human]
+expected_outcome: {outcome: to_confirm, sections: ["4.1"]}
+should_escalate: true

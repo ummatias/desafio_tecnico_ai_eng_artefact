@@ -1,0 +1,15 @@
+id: defeito-40-dias-garantia-legal
+category: exchange
+# Pedido 5 recebido em 12/01/2026; defeito em 14/02 (40 dias da compra, 33 do recebimento):
+# garantia legal de 90 dias do recebimento (§8.1); nunca "só com o fabricante" (P-01).
+source: "§4.2, §8.1, P-01, P-17"
+reference_date: 2026-02-14T10:00
+session: {phone: "(67) 98765-4321", tracking_source: fixture}
+turns:
+  - user: "o violão do pedido 5 apareceu com o tampo rachado, o que eu faço?"
+    expected_facts:
+      - any_of: ["garantia legal", "90 dias"]
+    must_not_include: ["só com o fabricante", "somente com o fabricante", "procure o fabricante"]
+expected_tools: [check_exchange]
+expected_outcome: {outcome: eligible, sections: ["8.1"]}
+should_escalate: true

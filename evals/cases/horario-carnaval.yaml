@@ -1,0 +1,12 @@
+id: horario-carnaval
+category: hours
+# Sexta 13/02/2026; segunda 16/02 é Carnaval (ponto facultativo): horário normal 09:00 às
+# 18:00, com aviso para confirmar pelo WhatsApp (P-09).
+source: "§2, P-09"
+reference_date: 2026-02-13T10:00
+session: {phone: null}
+turns:
+  - user: "segunda agora é carnaval, a loja vai abrir?"
+    expected_facts: ["18:00", "confirm"]
+    must_not_include: ["fechada na segunda"]
+should_escalate: false

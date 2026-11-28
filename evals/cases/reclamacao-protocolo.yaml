@@ -1,0 +1,12 @@
+id: reclamacao-protocolo
+category: escalation
+# Reclamação: registrar e passar protocolo e prazo (§7.3). Qui 26/11 10:00 + 24 horas úteis:
+# 8 h (qui) + 9 h (sex) + 4 h (sáb) + 3 h (seg) = 30/11/2026 às 12:00.
+source: "§7.3, P-15"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quero registrar uma reclamação, fui muito mal atendida na loja ontem"
+    expected_facts: ["EMP-20261126-", "30/11/2026"]
+expected_tools: [escalate_to_human]
+should_escalate: true

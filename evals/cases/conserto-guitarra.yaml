@@ -1,0 +1,11 @@
+id: conserto-guitarra
+category: scope
+# Pergunta útil de atendimento: não é recusada como fora de escopo. O manual não fala em
+# conserto; o agente não inventa o serviço.
+source: "§7.1"
+reference_date: 2026-11-26T10:00
+session: {phone: null}
+turns:
+  - user: "vocês consertam guitarra? o braço da minha empenou"
+    must_not_include: ["R$", "consertamos sim", "fazemos o conserto"]
+should_refuse: false

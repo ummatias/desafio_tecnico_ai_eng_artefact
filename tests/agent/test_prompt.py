@@ -85,4 +85,5 @@ def test_fully_rendered(seeded_engine: Engine) -> None:
     assert PROMPT_VERSION == "v1"
     assert re.search(r"\$\w", prompt) is None
     assert "untrusted_data" in prompt
+    assert '"kind": "tool_result"' in prompt
     assert "quote_cart" in prompt

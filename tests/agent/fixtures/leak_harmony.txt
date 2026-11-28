@@ -1,0 +1,1 @@
+<|start|>assistant<|channel|>commentary to=functions.check_exchange <|constrain|>json<|message|>{"order_id": 5, "product_id": 97, "reason": "regret"}<|call|>

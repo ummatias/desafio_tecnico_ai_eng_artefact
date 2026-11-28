@@ -58,3 +58,31 @@ def test_nested_values() -> None:
         "items": [{"q": "[email]"}],
         "order_id": 8,
     }
+
+
+NB_HYPHEN = chr(0x2011)
+
+
+@pytest.mark.parametrize("dash", ["-", NB_HYPHEN, chr(0x2010), chr(0x2013), chr(0x2212)])
+def test_protocol_is_never_a_phone(dash: str) -> None:
+    protocol = f"EMP{dash}20261127{dash}0001"
+    assert Masker().text(f"Seu protocolo é **{protocol}**.") == f"Seu protocolo é **{protocol}**."
+
+
+def test_unicode_hyphen_phone_is_masked() -> None:
+    text = f"me liga no (67) 99654{NB_HYPHEN}7821 ou no 98765{chr(0x2013)}4321"
+    assert Masker().text(text) == "me liga no [telefone] ou no [telefone]"
+
+
+def test_unicode_hyphen_cpf_is_masked() -> None:
+    assert Masker().text(f"cpf 123.456.789{NB_HYPHEN}09") == "cpf [cpf]"
+
+
+def test_phone_next_to_protocol_still_masked() -> None:
+    text = f"EMP{NB_HYPHEN}20261127{NB_HYPHEN}0001, fone 99654{NB_HYPHEN}7821"
+    assert Masker().text(text) == f"EMP{NB_HYPHEN}20261127{NB_HYPHEN}0001, fone [telefone]"
+
+
+def test_store_phone_with_unicode_hyphen_kept() -> None:
+    text = f"WhatsApp (67) 3321{NB_HYPHEN}4500"
+    assert Masker().text(text) == text

@@ -1,0 +1,11 @@
+id: black-friday-desconto
+category: promo
+# Só valem promoções ativas no sistema (P-19); não há promoção "Black Friday" ativa. Os
+# "15% a 30% em todo o catálogo" do §6.1 não podem ser prometidos.
+source: "§6.1, §7.3, P-19"
+reference_date: 2026-11-26T10:00
+session: {phone: null}
+turns:
+  - user: "amanhã é black friday, vai ter 30% de desconto em tudo?"
+    must_not_include: ["30% em tudo", "15% a 30%", "todo o catálogo com desconto"]
+should_escalate: false

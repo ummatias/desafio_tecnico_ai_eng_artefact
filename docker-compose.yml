@@ -15,3 +15,19 @@ services:
       - ./var:/app/var
     stdin_open: true
     tty: true
+  eval:
+    image: emporio-cli
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////app/var/emporio.db
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      - ./var:/app/var
+      - ./evals:/app/evals:ro
+    entrypoint: ["emporio", "eval", "run"]
+    command: []

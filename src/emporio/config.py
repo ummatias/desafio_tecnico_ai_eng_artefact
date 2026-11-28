@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = Field(default=30, gt=0)
     llm_max_retries: int = Field(default=2, ge=0, le=5)
     llm_max_tokens: int = Field(default=2048, ge=256)
+    # None: não envia temperature (vale o padrão do provider; a OpenAI recomenda 1.0 no gpt-oss).
+    llm_temperature: float | None = Field(default=None, ge=0, le=2)
     # Providers do OpenRouter em ordem, separados por vírgula; vazio = roteamento padrão.
     # Com valor, não há fallback para outros providers (evals e comparação, commit 13).
     llm_providers: str = ""
@@ -52,6 +54,8 @@ class Settings(BaseSettings):
     # Trace JSONL, uma linha por turno, com dados pessoais mascarados.
     trace_enabled: bool = True
     trace_path: Path = Path("var/traces/turns.jsonl")
+    # Juiz de tom dos evals, num modelo diferente de LLM_MODEL. Vazio = tom e recusa "n/d".
+    eval_judge_model: str | None = None
 
     @property
     def llm_provider_order(self) -> list[str]:

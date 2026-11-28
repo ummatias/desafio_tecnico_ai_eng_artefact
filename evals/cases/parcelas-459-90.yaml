@@ -1,0 +1,14 @@
+id: parcelas-459-90
+category: payment
+# Rozini RC-104 R$ 459,90: 5x = R$ 91,98 (mínimo R$ 80 de 4x a 6x); 6x = 76,65 < 80 e de 7x
+# a 12x a parcela fica abaixo de R$ 100. Máximo: 5x de R$ 91,98. A pergunta é só "em quantas
+# vezes": o valor da parcela não é exigido.
+source: "§3, §3.1, P-05, P-06"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "em quantas vezes posso parcelar o violão rozini rc-104?"
+    expected_facts:
+      - any_of: ["5x", "5 vezes", "cinco vezes"]
+    must_not_include: ["6x de", "10x de", "12x de", "12x sem juros"]
+should_escalate: false

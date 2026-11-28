@@ -116,3 +116,68 @@ def test_blank_line_and_eof(env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     code, _ = _chat("\n   \n")
     assert code == 0
     assert llm.requests == []
+
+
+CASE = """\
+id: oi
+category: scope
+source: "§7.2"
+reference_date: 2026-11-26
+turns:
+  - user: "oi"
+    expected_facts: ["Como posso ajudar"]
+should_escalate: false
+"""
+
+
+def _cases_dir(env: Path) -> Path:
+    cases = env / "cases"
+    cases.mkdir()
+    (cases / "oi.yaml").write_text(CASE, encoding="utf-8")
+    return cases
+
+
+def test_eval_run_writes_results_and_report(env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _fake(monkeypatch, [text_response("Oi! Como posso ajudar?")] * 2)
+    cases = _cases_dir(env)
+    baseline = env / "results" / "baseline.md"
+    args = ["eval", "run", "--cases", str(cases), "--runs", "2", "--out", str(env / "out")]
+    result = CliRunner().invoke(cli.app, [*args, "--report", str(baseline)])
+    assert result.exit_code == 0, result.output
+    (run_dir,) = (env / "out").iterdir()
+    summary = json.loads((run_dir / "results.json").read_text("utf-8"))
+    assert summary["status_counts"]["stable_pass"] == 1
+    assert summary["runs_per_case"] == 2
+    assert (run_dir / "report.md").read_text("utf-8") == baseline.read_text("utf-8")
+    assert len((run_dir / "traces.jsonl").read_text("utf-8").splitlines()) == 2
+    assert "oi #2: pass" in result.output
+
+
+def test_eval_run_without_key_exits_2(env: Path) -> None:
+    cases = _cases_dir(env)
+    result = CliRunner().invoke(cli.app, ["eval", "run", "--cases", str(cases)])
+    assert result.exit_code == cli.EXIT_CONFIG
+    assert "LLM_API_KEY" in result.output
+
+
+def test_eval_run_unknown_case_exits_2(env: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _fake(monkeypatch, [])
+    cases = _cases_dir(env)
+    result = CliRunner().invoke(cli.app, ["eval", "run", "--cases", str(cases), "--only", "x"])
+    assert result.exit_code == cli.EXIT_CONFIG
+    assert "unknown case ids" in result.output
+
+
+def test_eval_compare(env: Path) -> None:
+    def write(name: str, statuses: dict[str, str]) -> Path:
+        path = env / name
+        cases = [{"id": k, "status": v} for k, v in statuses.items()]
+        path.write_text(json.dumps({"cases": cases}), encoding="utf-8")
+        return path
+
+    a = write("a.json", {"x": "stable_pass", "y": "flaky"})
+    b = write("b.json", {"x": "stable_pass", "y": "stable_pass"})
+    result = CliRunner().invoke(cli.app, ["eval", "compare", str(a), str(b)])
+    assert result.exit_code == 0
+    assert "só B (1): y" in result.output
+    assert "os dois (1): x" in result.output

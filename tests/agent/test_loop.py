@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 from sqlalchemy import Engine, func, select
@@ -68,8 +69,10 @@ def test_tool_then_answer_with_envelope(fresh_engine: Engine) -> None:
     assert second[-2].role == "assistant" and second[-2].tool_calls == SEARCH.tool_calls
     payload = _tool_payload(second[-1])
     assert second[-1].tool_call_id == "call_1"
-    assert payload["tool"] == "search_products"
+    assert set(payload) == {"kind", "untrusted_data", "data"}
+    assert payload["kind"] == "tool_result"
     assert payload["untrusted_data"] is True
+    assert "tool" not in payload  # o nome da tool não aparece no topo
     assert "GD20" in json.dumps(payload["data"])
 
 
@@ -251,3 +254,68 @@ def test_failed_escalation_does_not_block_retry(fresh_engine: Engine) -> None:
     assert [r.error for r in result.tool_runs] == ["invalid_arguments", None]
     assert not result.tool_runs[1].reused
     assert _ticket_count(fresh_engine) == 1
+
+
+FIXTURES = Path(__file__).parent / "fixtures"
+LEAK = (FIXTURES / "leak_real.txt").read_text("utf-8")
+LEAK_HARMONY = (FIXTURES / "leak_harmony.txt").read_text("utf-8")
+
+
+def test_control_tokens_retried_once(fresh_engine: Engine) -> None:
+    llm = FakeLLMClient([text_response(LEAK), text_response("O prazo terminou em 19/01.")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero devolver")
+    assert result.stop_reason == "answer"
+    assert result.reply == "O prazo terminou em 19/01."
+    assert result.invalid_responses == 1
+    assert llm.requests[0] == llm.requests[1]  # a mesma chamada, repetida
+    assert _ticket_count(fresh_engine) == 0
+
+
+def test_control_tokens_twice_go_to_forced_answer(fresh_engine: Engine) -> None:
+    llm = FakeLLMClient([text_response(LEAK), text_response(LEAK), text_response("Resposta.")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero devolver")
+    assert result.stop_reason == "forced_answer"
+    assert result.reply == "Resposta."
+    assert result.invalid_responses == 2
+    assert llm.requests[-1].tools == ()
+
+
+def test_control_tokens_in_forced_answer_retried_then_ticket(fresh_engine: Engine) -> None:
+    llm = FakeLLMClient([text_response("")] + [text_response(LEAK)] * 2)
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero devolver")
+    assert result.stop_reason == "empty_answer"
+    assert result.invalid_responses == 2
+    assert result.escalated and result.protocol is not None
+    assert "<|" not in result.reply
+    assert _ticket_count(fresh_engine) == 1
+
+
+def test_control_tokens_never_reach_the_customer(fresh_engine: Engine) -> None:
+    llm = FakeLLMClient([text_response(LEAK)] * 4)
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero devolver")
+    assert result.stop_reason == "invalid_answer"
+    assert "<|" not in result.reply and result.escalated
+    assert len(llm.requests) == 4
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        LEAK,
+        LEAK_HARMONY,
+        "O prazo terminou em 19/01. <|end|>",
+        "Vou verificar<|channel|>final e já te digo.",
+        "Oi! <|qualquer_marcador|> Posso ajudar?",
+    ],
+)
+def test_any_control_token_is_invalid(fresh_engine: Engine, text: str) -> None:
+    llm = FakeLLMClient([text_response(text), text_response("Resposta limpa.")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "quero devolver")
+    assert result.reply == "Resposta limpa."
+    assert result.invalid_responses == 1
+
+
+def test_plain_angle_brackets_are_not_control_tokens(fresh_engine: Engine) -> None:
+    llm = FakeLLMClient([text_response("Use o código <|> ou a tag <b>, ou <|ABC|>, ou a | b.")])
+    result = run_turn(llm, _ctx(fresh_engine), [], "oi")
+    assert result.stop_reason == "answer" and result.invalid_responses == 0

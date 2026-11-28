@@ -1,0 +1,11 @@
+id: contato-telefone-email
+category: scope
+# P-13: telefone (67) 3341-4444 (nunca como WhatsApp) e e-mail sem acento.
+source: "§1.2, §7, P-13"
+reference_date: 2026-11-26T10:00
+session: {phone: null}
+turns:
+  - user: "qual o telefone fixo e o e-mail de vocês?"
+    expected_facts: ["3341-4444", "contato@emporiodamusica.com.br"]
+    must_not_include: ["whatsapp (67) 3341-4444", "whatsapp: (67) 3341-4444", "empóriodamusica"]
+should_escalate: false

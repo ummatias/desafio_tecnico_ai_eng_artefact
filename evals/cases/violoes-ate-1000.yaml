@@ -1,0 +1,14 @@
+id: violoes-ate-1000
+category: product
+# Violões ativos com estoque até R$ 1.000,00; o mais barato é o Tagima Memphis AC-39 a
+# R$ 429,90. Fora: Giannini GF-3D (produto 96, sem estoque) e Shelby SN-7C (descontinuado).
+# Giannini GNF-3 CEQ: R$ 1.049,00, no PIX 1.049,00 - 52,45 = R$ 996,55 (opção no PIX).
+source: "§3, §7.3"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quero um violão de até mil reais, quais vocês têm?"
+    expected_facts: ["R$ 429,90", "996,55"]
+expected_tools: [search_products]
+must_not_include: ["GF-3D", "SN-7C"]
+should_escalate: false

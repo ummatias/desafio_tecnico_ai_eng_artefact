@@ -1,0 +1,13 @@
+id: horario-feriado-natal
+category: hours
+# Quinta 24/12/2026; sexta 25/12 é Natal (feriado nacional): fechada. Reabre sábado 26/12
+# às 09:00; informar o horário de retorno (§7.1).
+source: "§2, §7.1, P-09"
+reference_date: 2026-12-24T10:00
+session: {phone: null}
+turns:
+  - user: "amanhã vocês abrem?"
+    expected_facts:
+      - any_of: ["fechad", "fecha", "não abr"]
+      - any_of: ["26/12", "sábado"]
+should_escalate: false
