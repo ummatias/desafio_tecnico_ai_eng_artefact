@@ -1,0 +1,8 @@
+id: 01-violoes-ate-1000
+category: product
+source: "§3, §7.3"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "oi! quais opções de violões vocês têm custando até R$ 1000?"
+  - user: "e o yamaha f310, dá pra parcelar em quantas vezes?"
