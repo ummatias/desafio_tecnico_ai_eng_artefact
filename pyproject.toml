@@ -64,6 +64,7 @@ module = [
     "emporio.llm.*",
     "emporio.agent.*",
     "emporio.observability.*",
+    "emporio.evals.*",
     "emporio.cli",
 ]
 strict = true

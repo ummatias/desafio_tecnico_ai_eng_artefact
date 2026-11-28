@@ -1,0 +1,11 @@
+id: produto-gd20
+category: product
+# Produto 95 a R$ 2.199,00, sem promoção ativa; PIX 5% (§3): 2.199,00 - 109,95 = 2.089,05.
+source: "§3, §6.2, §7.1, P-04"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "oi! vocês têm o violão takamine gd 20?"
+    expected_facts: ["R$ 2.199,00", "R$ 2.089,05"]
+expected_tools: [search_products]
+should_escalate: false

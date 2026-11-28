@@ -1,5 +1,5 @@
 """
-CLI do agente: `emporio chat`.
+CLI do agente: `emporio chat` e `emporio eval run|compare`.
 
 O telefone simula o número verificado pelo canal (WhatsApp).
 O histórico vive só na sessão do terminal
@@ -9,7 +9,10 @@ O trace gravado continua mascarado.
 """
 
 import json
+import re
 from collections.abc import Callable
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Annotated
 from uuid import uuid4
 
@@ -24,6 +27,10 @@ from emporio.agent import PROMPT_VERSION, TurnResult, run_turn
 from emporio.config import Settings, get_settings
 from emporio.db.engine import make_engine
 from emporio.db.seed import seed
+from emporio.evals.cases import CaseError, load_cases
+from emporio.evals.judge import JudgeConfigError, make_judge
+from emporio.evals.report import compare, render_markdown, summarize, write_report
+from emporio.evals.runner import DEFAULT_RUNS, RunRecord, run_suite
 from emporio.llm import LLMClient, LLMConfigError, Message, make_llm_client
 from emporio.observability import TraceWriter
 from emporio.repositories import Customer, CustomerRepository
@@ -35,6 +42,8 @@ QUIT = "/sair"
 CLEAR = "/limpar"
 
 app = typer.Typer(no_args_is_help=True, add_completion=False, help="Agente da Empório da Música.")
+eval_app = typer.Typer(no_args_is_help=True, help="Avaliação do agente com casos YAML.")
+app.add_typer(eval_app, name="eval")
 
 
 @app.callback()
@@ -178,3 +187,106 @@ def chat(
         session_id=session_id,
     )
     raise typer.Exit(code)
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9.-]+", "_", text).strip("_")
+
+
+def run_evals(
+    settings: Settings,
+    console: Console,
+    *,
+    cases_dir: Path,
+    runs: int = DEFAULT_RUNS,
+    only: set[str] | None = None,
+    out_dir: Path = Path("var/evals"),
+    report_path: Path | None = None,
+    llm_factory: Callable[[Settings], LLMClient] = make_llm_client,
+) -> int:
+    """Roda a suíte e grava `results.json`, `report.md` e `traces.jsonl`."""
+    try:
+        cases = load_cases(cases_dir, only)
+        llm = llm_factory(settings)
+        judge = make_judge(settings, llm_factory)
+    except (CaseError, JudgeConfigError) as exc:
+        console.print(Text(str(exc), style="red"))
+        return EXIT_CONFIG
+    except LLMConfigError as exc:
+        console.print(Text(f"{exc}. Defina LLM_API_KEY no .env.", style="red"))
+        return EXIT_CONFIG
+
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    target = out_dir / f"{stamp}-{_slug(settings.llm_model)}"
+    tracer = TraceWriter(target / "traces.jsonl")
+    console.print(
+        Text(
+            f"{len(cases)} casos, {runs} execuções cada · modelo {settings.llm_model} · "
+            f"juiz {judge.model if judge else 'desligado'}"
+        )
+    )
+
+    def progress(record: RunRecord) -> None:
+        status = "pass" if record.passed else "FAIL"
+        console.print(Text(f"  {record.case_id} #{record.run_index}: {status}"))
+
+    suite = run_suite(
+        cases, settings, llm, runs=runs, tracer=tracer, judge=judge, on_record=progress
+    )
+    summary = summarize(suite)
+    results, report = write_report(summary, target)
+    if report_path is not None:
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(render_markdown(summary), encoding="utf-8")
+    counts = summary["status_counts"]
+    console.print(
+        Text(
+            f"stable_pass {counts['stable_pass']} · flaky {counts['flaky']} · "
+            f"stable_fail {counts['stable_fail']} · relatório: {report}"
+        )
+    )
+    console.print(Text(f"resultados: {results}", style="dim"))
+    return 0
+
+
+@eval_app.command("run")
+def eval_run(
+    cases: Annotated[Path, typer.Option(help="Pasta dos casos YAML.")] = Path("evals/cases"),
+    runs: Annotated[int, typer.Option(min=1, help="Execuções por caso.")] = DEFAULT_RUNS,
+    only: Annotated[
+        str | None, typer.Option(help="Ids separados por vírgula (ex.: produto-gd20).")
+    ] = None,
+    out: Annotated[Path, typer.Option(help="Pasta das saídas.")] = Path("var/evals"),
+    report: Annotated[
+        Path | None, typer.Option(help="Também grava o relatório markdown neste caminho.")
+    ] = None,
+) -> None:
+    """Roda os casos pelo agente real e grava o relatório."""
+    selected = {i.strip() for i in only.split(",") if i.strip()} if only else None
+    code = run_evals(
+        get_settings(),
+        Console(highlight=False),
+        cases_dir=cases,
+        runs=runs,
+        only=selected,
+        out_dir=out,
+        report_path=report,
+        llm_factory=make_llm_client,
+    )
+    raise typer.Exit(code)
+
+
+@eval_app.command("compare")
+def eval_compare(
+    a: Annotated[Path, typer.Argument(help="results.json da versão A.")],
+    b: Annotated[Path, typer.Argument(help="results.json da versão B.")],
+) -> None:
+    """Lista os casos que passam (stable_pass) só em A, só em B, nos dois ou em nenhum."""
+    console = Console(highlight=False)
+    buckets = compare(
+        json.loads(a.read_text(encoding="utf-8")), json.loads(b.read_text(encoding="utf-8"))
+    )
+    labels = {"only_a": "só A", "only_b": "só B", "both": "os dois", "neither": "nenhum"}
+    for key, label in labels.items():
+        ids = ", ".join(buckets[key]) or "-"
+        console.print(Text(f"{label} ({len(buckets[key])}): {ids}"))
