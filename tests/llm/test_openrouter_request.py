@@ -48,6 +48,14 @@ def test_provider_routing_defaults(harness: MakeHarness) -> None:
     assert body["provider"] == {"data_collection": "deny", "require_parameters": True}
     assert "reasoning" not in body
     assert "tools" not in body
+    assert "temperature" not in body
+
+
+def test_temperature_sent_when_set(harness: MakeHarness) -> None:
+    h = harness(ok(), llm_temperature=0.2)
+    h.client.complete(HELLO, [])
+    [body] = h.server.bodies()
+    assert body["temperature"] == 0.2
 
 
 def test_pinned_providers_without_fallbacks(harness: MakeHarness) -> None:
@@ -69,7 +77,7 @@ def test_no_attribution_headers(harness: MakeHarness) -> None:
 
 
 def test_reasoning_and_tool_calls_sent_back(harness: MakeHarness) -> None:
-    """D-46: a mensagem do assistente volta com tool_calls e reasoning_details."""
+    """A mensagem do assistente volta com tool_calls e reasoning_details."""
     details = [{"type": "reasoning.text", "text": "preciso do preço"}]
     call = {"id": "c1", "type": "function", "function": {"name": "get_product", "arguments": "{}"}}
     h = harness(ok(ok_body(None, tool_calls=[call], reasoning_details=details)), ok())

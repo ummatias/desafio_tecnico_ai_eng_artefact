@@ -231,6 +231,8 @@ class OpenRouterClient:
             "max_tokens": self._settings.llm_max_tokens,
             "extra_body": self._extra_body(),
         }
+        if self._settings.llm_temperature is not None:
+            kwargs["temperature"] = self._settings.llm_temperature
         if tools:
             kwargs["tools"] = openai_tools(tools)
         attempts = 1 + self._settings.llm_max_retries
