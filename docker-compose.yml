@@ -1,0 +1,17 @@
+services:
+  cli:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: emporio-cli
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////app/var/emporio.db
+      TRACE_PATH: /app/var/traces/turns.jsonl
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      - ./var:/app/var
+    stdin_open: true
+    tty: true
