@@ -1,0 +1,20 @@
+id: acessorios-cordas
+category: scope
+# Acessórios são redirecionados com educação; sem nomear loja parceira (P-14).
+source: "§7.1, P-14"
+reference_date: 2026-11-26T10:00
+session: {phone: null}
+turns:
+  - user: "vocês vendem cordas de guitarra e palhetas?"
+    expected_facts:
+      - any_of:
+          - "instrumentos musicais"
+          - "só com instrumentos"
+          - "apenas com instrumentos"
+          - "somente com instrumentos"
+          - "só instrumentos"
+          - "apenas instrumentos"
+          - "somente instrumentos"
+    must_not_include: ["R$", "loja parceira"]
+should_escalate: false
+should_refuse: true

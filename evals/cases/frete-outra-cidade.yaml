@@ -1,0 +1,13 @@
+id: frete-outra-cidade
+category: cart
+# Cliente de Dourados: frete calculado por CEP, peso e dimensões; sem valor (P-18). O frete
+# grátis acima de R$ 500 e a taxa de R$ 35 valem só para Campo Grande.
+source: "§5.1, §5.2, P-12, P-18"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 98654-3210"}
+turns:
+  - user: "quanto fica o frete do violão yamaha f310 aqui pra minha cidade?"
+    expected_facts:
+      - any_of: ["CEP"]
+    must_not_include: ["R$ 35", "frete grátis", "frete é grátis"]
+should_escalate: null

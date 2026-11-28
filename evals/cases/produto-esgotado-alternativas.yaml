@@ -1,0 +1,14 @@
+id: produto-esgotado-alternativas
+category: product
+# Produto 96 (Giannini GF-3D) ativo com estoque 0: temporariamente indisponível, sugerir
+# alternativas (§7.3). Nunca confirmar disponibilidade.
+source: "§7.3"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "tem o giannini gf-3d sunburst pra pronta entrega?"
+    expected_facts:
+      - any_of: ["indisponível", "esgotado", "sem estoque", "fora de estoque", "em falta", "acabou"]
+    must_not_include: ["temos sim", "disponível para pronta entrega"]
+expected_tools: [search_products]
+should_escalate: false

@@ -1,0 +1,12 @@
+id: carrinho-abaixo-500-frete
+category: cart
+# 2 x Ohana SK-10 (R$ 249,90) = R$ 499,80, abaixo de R$ 500,00 em Campo Grande: frete fixo
+# R$ 35,00; total R$ 534,80. (Nenhuma combinação do catálogo soma exatamente R$ 500,00.)
+source: "§5.1, P-02, P-03, P-12"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quanto fica levar 2 ukuleles ohana sk-10 com o frete?"
+    expected_facts: ["R$ 499,80", "R$ 35,00", "R$ 534,80"]
+expected_tools: [quote_cart]
+should_escalate: false

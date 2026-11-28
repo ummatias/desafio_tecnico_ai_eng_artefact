@@ -1,0 +1,14 @@
+id: arrependimento-recebi-ontem
+category: exchange
+# Rastreio: entregue em 12/01/2026. Em 13/04/2026 o cliente diz que recebeu ontem: a data
+# informada não decide (P-17); o arrependimento segue expirado.
+source: "§4.1, P-17"
+reference_date: 2026-04-13T10:00
+session: {phone: "(67) 98765-4321", tracking_source: fixture}
+turns:
+  - user: "quero devolver o violão do pedido 5, me arrependi"
+  - user: "mas eu recebi ontem!"
+    must_not_include: ["dentro do prazo", "pode devolver sim"]
+expected_tools: [check_exchange]
+expected_outcome: {outcome: expired, sections: ["4.1"]}
+should_escalate: null

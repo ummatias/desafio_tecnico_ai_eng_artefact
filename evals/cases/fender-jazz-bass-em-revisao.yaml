@@ -1,0 +1,14 @@
+id: fender-jazz-bass-em-revisao
+category: product
+# "Fender Jazz Bass" só aparece na descrição do produto 135, de cadastro inconsistente:
+# nem "temos" nem "não temos"; cadastro em revisão (princípio 3).
+source: "data_quality_report, catalog_review.yaml"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "vocês têm fender jazz bass?"
+    expected_facts:
+      - any_of: ["revisão", "revisando", "confirmar", "verificar"]
+    must_not_include: ["temos sim", "não temos fender", "não trabalhamos com fender"]
+expected_tools: [search_products]
+should_escalate: null

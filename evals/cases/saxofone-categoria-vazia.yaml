@@ -1,0 +1,15 @@
+id: saxofone-categoria-vazia
+category: product
+# Categoria 6 (Sopro, madeiras) sem produtos: dizer que no momento não há; é instrumento,
+# então não é recusa de escopo.
+source: "§7.1, §7.3"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "vocês vendem saxofone?"
+    expected_facts:
+      - any_of: ["no momento", "não temos", "não há", "sem saxofone", "não estamos com"]
+    must_not_include: ["R$"]
+expected_tools: [search_products]
+should_escalate: false
+should_refuse: false

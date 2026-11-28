@@ -1,0 +1,16 @@
+id: arrependimento-fora-com-rastreio
+category: exchange
+# Pedido 5 entregue em 12/01/2026 (rastreio da fixture); em 20/01 é o 8º dia: arrependimento
+# expirado (7 dias corridos do recebimento, último dia 19/01). Resposta clara, sem chamado.
+# Basta uma das datas: recebimento ou fim do prazo.
+source: "§4.1, P-17"
+reference_date: 2026-01-20T10:00
+session: {phone: "(67) 98765-4321", tracking_source: fixture}
+turns:
+  - user: "me arrependi da compra do pedido 5, quero devolver o violão"
+    expected_facts:
+      - any_of: ["12/01/2026", "19/01/2026"]
+    must_not_include: ["dentro do prazo"]
+expected_tools: [check_exchange]
+expected_outcome: {outcome: expired, sections: ["4.1"]}
+should_escalate: false

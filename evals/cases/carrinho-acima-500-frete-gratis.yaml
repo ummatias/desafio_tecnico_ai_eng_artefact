@@ -1,0 +1,13 @@
+id: carrinho-acima-500-frete-gratis
+category: cart
+# Kala KA-C (R$ 349,90) + Kalani KAL-300S (R$ 179,90) = R$ 529,80 em Campo Grande: frete
+# grátis.
+source: "§5.1, P-12"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quero o ukulele kala ka-c e o kalani kal-300s, quanto dá com frete?"
+    expected_facts: ["R$ 529,80", "grátis"]
+    must_not_include: ["R$ 35,00"]
+expected_tools: [quote_cart]
+should_escalate: false
