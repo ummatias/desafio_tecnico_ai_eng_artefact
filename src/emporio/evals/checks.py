@@ -26,11 +26,15 @@ class Check:
     detail: str = ""
 
 
+_PERCENT = re.compile(r"(\d)\s+%")
+
+
 def normalize(text: str) -> str:
     """Compara texto como o cliente lê: sem markdown, hífens e espaços especiais unificados."""
     text = unicodedata.normalize("NFKC", text).translate(_DASHES)
     text = text.translate(_NBSP)
     text = _MARKDOWN.sub("", text)
+    text = _PERCENT.sub(r"\1%", text)  # "8 %" e "8%" são a mesma coisa
     return _SPACES.sub(" ", text).strip().casefold()
 
 
