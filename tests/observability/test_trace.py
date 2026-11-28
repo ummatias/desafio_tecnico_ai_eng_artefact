@@ -52,6 +52,7 @@ def test_one_masked_line_per_turn(fresh_engine: Engine, tmp_path: Path) -> None:
     assert first["user_text"] == "sou a [nome], meu fone é [telefone]"
     assert first["reply"] == "Feito, [nome]!"
     assert first["models"] == ["m"] and first["providers"] == ["p"]
+    assert first["call_providers"] == [None, "p"] and first["invalid_responses"] == 0
     assert first["llm_calls"] == 2
     assert second["session_id"] is None
 
