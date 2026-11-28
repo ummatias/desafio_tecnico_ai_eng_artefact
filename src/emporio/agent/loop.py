@@ -3,13 +3,16 @@ Um turno do agente: loop de tool calling limitado, com saída segura feita por c
 
     1. Até `MAX_ITERATIONS` chamadas ao LLM com as 7 tools, cada saída de tool volta envelopada
     como dado.
-    2. Iterações esgotadas ou texto vazio: uma última chamada sem tools pede a resposta com o que as
-    tools já devolveram (`forced_answer`).
+    2. Iterações esgotadas, texto vazio ou texto com marcadores de controle do modelo: uma última
+    chamada sem tools pede a resposta com o que as tools já devolveram (`forced_answer`). Uma
+    resposta com marcadores (`<|start|>`, `<|channel|>`...) é inválida: a mesma chamada é repetida
+    uma vez e, se persistir, segue para o passo seguinte. Ela nunca chega ao cliente.
     3. Se isso falhar, ou se o LLM falhar (`LLMError`), o código abre um chamado com
     `escalate_to_human` e responde com o protocolo. No máximo um chamado por turno.
 """
 
 import json
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -17,7 +20,7 @@ from time import perf_counter
 from typing import Any, Literal
 
 from emporio.agent.prompt import PROMPT_VERSION, build_system_prompt
-from emporio.llm import LLMClient, LLMError, Message, Response
+from emporio.llm import LLMClient, LLMError, Message, Response, ToolSchema
 from emporio.observability.masking import Masker
 from emporio.observability.trace import TraceWriter
 from emporio.tools import ToolContext, ToolResult, run_tool, tool_schemas
@@ -26,7 +29,12 @@ MAX_ITERATIONS = 5
 ESCALATION_TOOL = "escalate_to_human"
 SUMMARY_MAX_CHARS = 500
 
-StopReason = Literal["answer", "forced_answer", "max_iterations", "llm_error", "empty_answer"]
+StopReason = Literal[
+    "answer", "forced_answer", "max_iterations", "llm_error", "empty_answer", "invalid_answer"
+]
+# Marcadores do formato de chat do modelo (<|start|>, <|channel|>...), em qualquer posição: vazam
+# como texto quando o provider não converte uma chamada de tool.
+CONTROL_TOKENS = re.compile(r"<\|[a-z_]+\|>")
 
 FORCED_ANSWER_INSTRUCTION = (
     "Limite de consultas deste turno atingido: não chame mais ferramentas. Responda ao cliente "
@@ -70,12 +78,20 @@ class TurnResult:
     llm_error: str | None
     latency_ms: float
     transcript: tuple[Message, Message]  # (cliente, resposta final) para o histórico
+    invalid_responses: int = 0  # respostas descartadas por marcadores de controle
 
 
-def wrap_tool_output(name: str, result: ToolResult) -> str:
-    """Saída de tool como dado não confiável, o JSON mantém texto do banco dentro de strings."""
+def wrap_tool_output(result: ToolResult) -> str:
+    """
+    Saída de tool como dado não confiável; o JSON mantém texto do banco dentro de strings.
+
+    Sem o nome da tool no topo, o envelope não parece uma chamada para o modelo imitar; o
+    `tool_call_id` da mensagem já liga o resultado à chamada.
+    """
     return json.dumps(
-        {"tool": name, "untrusted_data": True, "data": result}, ensure_ascii=False, default=str
+        {"kind": "tool_result", "untrusted_data": True, "data": result},
+        ensure_ascii=False,
+        default=str,
     )
 
 
@@ -106,10 +122,29 @@ def _execute(name: str, arguments: str, ctx: ToolContext, runs: Sequence[ToolRun
     return _run(name, arguments, ctx, by="model")
 
 
+def _invalid(response: Response) -> bool:
+    return not response.tool_calls and bool(response.text and CONTROL_TOKENS.search(response.text))
+
+
 def _text(response: Response) -> str | None:
-    if response.tool_calls or response.text is None:
+    if response.tool_calls or response.text is None or _invalid(response):
         return None
     return response.text.strip() or None
+
+
+def _complete(
+    llm: LLMClient,
+    messages: Sequence[Message],
+    tools: Sequence[ToolSchema],
+    responses: list[Response],
+) -> tuple[Response, int]:
+    response = llm.complete(messages, tools)
+    responses.append(response)
+    if not _invalid(response):
+        return response, 0
+    retry = llm.complete(messages, tools)
+    responses.append(retry)
+    return retry, 1
 
 
 def _fallback(
@@ -156,33 +191,38 @@ def run_turn(
     stop: StopReason = "max_iterations"
     error: LLMError | None = None
     iterations = 0
+    invalid = 0
 
     while iterations < max_iterations:
         iterations += 1
         try:
-            response = llm.complete(messages, schemas)
+            response, retried = _complete(llm, messages, schemas, responses)
         except LLMError as exc:
             stop, error = "llm_error", exc
             break
-        responses.append(response)
+        invalid += retried + _invalid(response)
         if response.tool_calls:
             messages.append(response.as_message())
             for call in response.tool_calls:
                 run = _execute(call.name, call.arguments, ctx, runs)
                 runs.append(run)
-                messages.append(Message.tool(call.id, wrap_tool_output(call.name, run.result)))
+                messages.append(Message.tool(call.id, wrap_tool_output(run.result)))
             continue
         reply = _text(response)
-        stop = "answer" if reply is not None else "empty_answer"
+        if reply is not None:
+            stop = "answer"
+        else:
+            stop = "invalid_answer" if _invalid(response) else "empty_answer"
         break
 
-    if reply is None and stop in ("max_iterations", "empty_answer"):
+    if reply is None and stop in ("max_iterations", "empty_answer", "invalid_answer"):
+        forced_messages = [*messages, Message.system(FORCED_ANSWER_INSTRUCTION)]
         try:
-            forced = llm.complete([*messages, Message.system(FORCED_ANSWER_INSTRUCTION)], [])
+            forced, retried = _complete(llm, forced_messages, [], responses)
         except LLMError as exc:
             error = exc
         else:
-            responses.append(forced)
+            invalid += retried + _invalid(forced)
             reply = _text(forced)
             if reply is not None:
                 stop = "forced_answer"
@@ -202,6 +242,7 @@ def run_turn(
         llm_error=type(error).__name__ if error else None,
         latency_ms=(perf_counter() - started) * 1000,
         transcript=(Message.user(user_text), Message("assistant", reply)),
+        invalid_responses=invalid,
     )
     if tracer is not None:
         tracer.write(trace_record(result, ctx, user_text, session_id))
@@ -231,9 +272,12 @@ def trace_record(
         "models": sorted({r.model for r in responses if r.model}),
         "providers": sorted({r.provider for r in responses if r.provider}),
         "generation_ids": [r.generation_id for r in responses if r.generation_id],
+        # Provider de cada chamada, na ordem (a lista acima é só o conjunto).
+        "call_providers": [r.provider for r in responses],
         "iterations": result.iterations,
         "llm_calls": len(responses),
         "stop_reason": result.stop_reason,
+        "invalid_responses": result.invalid_responses,
         "llm_error": result.llm_error,
         "tools": [
             {
