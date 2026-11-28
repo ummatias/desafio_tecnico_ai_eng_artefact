@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = Field(default=30, gt=0)
     llm_max_retries: int = Field(default=2, ge=0, le=5)
     llm_max_tokens: int = Field(default=2048, ge=256)
-    # None: não envia temperature (vale o padrão do provider; a OpenAI recomenda 1.0 no gpt-oss).
-    llm_temperature: float | None = Field(default=None, ge=0, le=2)
+    # 0.2 medido contra o padrão do provider (a OpenAI recomenda 1.0 no gpt-oss): menos casos
+    # instáveis, sem piorar os estáveis. None não envia temperature.
+    llm_temperature: float | None = Field(default=0.2, ge=0, le=2)
     # Providers do OpenRouter em ordem, separados por vírgula; vazio = roteamento padrão.
     # Com valor, não há fallback para outros providers (evals e comparação, commit 13).
     llm_providers: str = ""
