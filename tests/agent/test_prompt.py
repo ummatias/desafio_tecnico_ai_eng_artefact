@@ -82,8 +82,17 @@ def test_unidentified_customer(seeded_engine: Engine) -> None:
 
 def test_fully_rendered(seeded_engine: Engine) -> None:
     prompt = _prompt(seeded_engine)
-    assert PROMPT_VERSION == "v1"
+    assert PROMPT_VERSION == "v2"
     assert re.search(r"\$\w", prompt) is None
     assert "untrusted_data" in prompt
     assert '"kind": "tool_result"' in prompt
     assert "quote_cart" in prompt
+
+
+def test_v1_still_renders_for_the_baseline(seeded_engine: Engine) -> None:
+    """A v1 (prompt da linha de base, antes dos ajustes) continua disponível para reproduzi-la."""
+    ctx = make_ctx(seeded_engine, ANA)
+    v1 = build_system_prompt(ctx, version="v1")
+    assert re.search(r"\$\w", v1) is None
+    assert "escalate_to_human` os devolveu" not in v1
+    assert "escalate_to_human` os devolveu" in build_system_prompt(ctx)

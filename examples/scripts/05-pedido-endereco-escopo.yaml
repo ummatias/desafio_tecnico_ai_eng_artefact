@@ -1,0 +1,10 @@
+id: 05-pedido-endereco-escopo
+category: order
+source: "§1.2, §2, §7.1, §9, P-08, P-14"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "qual o endereço da loja e até que horas vocês abrem hoje?"
+  - user: "e o meu pedido 8, cadê?"
+  - user: "vocês vendem cordas de guitarra?"
+  - user: "e o pedido 5, como está?"

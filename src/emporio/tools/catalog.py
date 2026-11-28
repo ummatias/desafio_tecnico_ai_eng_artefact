@@ -28,6 +28,8 @@ Availability = Literal["available", "out_of_stock", "discontinued", "coming_soon
 NAME_MATCH_THRESHOLD = 85
 CATEGORY_MATCH_THRESHOLD = 80
 UNDER_REVIEW_NOTE = "catalog under review: do not confirm or deny this product; offer the team"
+# Palavras de categoria ambíguas: "cordas" (de guitarra, acessório) e "instrumentos" (qualquer um).
+AMBIGUOUS_CATEGORY_WORDS = frozenset({"cordas", "instrumentos"})
 
 
 def availability(product: Product) -> Availability:
@@ -124,6 +126,41 @@ def _name_score(query: str, product: Product) -> float:
     return score
 
 
+def _singular(word: str) -> str:
+    if word.endswith("oes"):
+        return word[:-3] + "ao"  # violoes -> violao
+    return word.removesuffix("s")
+
+
+def _category_words(categories: list[Category]) -> dict[str, set[int]]:
+    """
+    Primeira palavra do nome de cada categoria, no plural e no singular ("ukuleles", "ukulele").
+
+    O nome do produto não traz a categoria ("Kala KA-C Concert Mogno"), então "ukulele kala ka-c"
+    não casava com nada.
+    """
+    words: dict[str, set[int]] = {}
+    for category in categories:
+        first = normalize_name(category.name).split()[0]
+        if first in AMBIGUOUS_CATEGORY_WORDS:
+            continue
+        for word in (first, _singular(first)):
+            words.setdefault(word, set()).add(category.category_id)
+    return words
+
+
+def _split_category_words(query: str, words: dict[str, set[int]]) -> tuple[str, set[int]]:
+    """Separa da busca as palavras que nomeiam uma categoria."""
+    rest: list[str] = []
+    named: set[int] = set()
+    for token in query.split():
+        if token in words:
+            named |= words[token]
+        else:
+            rest.append(token)
+    return " ".join(rest), named
+
+
 def _description_hit(query: str, product: Product) -> bool:
     description = normalize_name(product.description or "")
     return all(token in description.split() for token in query.split())
@@ -141,7 +178,17 @@ def search_products(args: SearchProductsArgs, ctx: ToolContext) -> ToolResult:
     ]
     query = normalize_name(args.query) if args.query else ""
     if query:
-        scored = [(_name_score(query, p), p) for p in products]
+        rest, named = _split_category_words(query, _category_words(categories))
+
+        def score(product: Product) -> float:
+            # Com a palavra da categoria, o produto dessa categoria é comparado sem ela; o
+            # resultado só pode subir, então nenhuma busca que já achava algo deixa de achar.
+            base = _name_score(query, product)
+            if product.category_id in named:
+                return max(base, _name_score(rest, product) if rest else 100.0)
+            return base
+
+        scored = [(score(p), p) for p in products]
         products = [
             p
             for score, p in sorted(scored, key=lambda sp: -sp[0])

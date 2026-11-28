@@ -16,6 +16,30 @@ def test_fuzzy_name_finds_gd20(ctx_for: MakeCtx) -> None:
     assert ids(result["products"])[0] == 95
 
 
+def test_category_word_in_query(ctx_for: MakeCtx) -> None:
+    """O nome do produto não traz a categoria: "ukulele kala ka-c" acha o Kala KA-C (120)."""
+    result = run_tool("search_products", {"query": "ukulele kala ka-c"}, ctx_for())
+    assert ids(result["products"])[0] == 120
+
+
+def test_category_word_alone_lists_the_category(ctx_for: MakeCtx) -> None:
+    result = run_tool("search_products", {"query": "ukulele", "limit": 20}, ctx_for())
+    found = ids(result["products"])
+    assert 118 in found and 120 in found  # Kalani KAL-300S, Kala KA-C
+    assert {p["category"] for p in result["products"]} == {"Ukuleles"}
+
+
+def test_singular_of_plural_category(ctx_for: MakeCtx) -> None:
+    result = run_tool("search_products", {"query": "violão yamaha f310"}, ctx_for())
+    assert "F310" in result["products"][0]["name"]
+
+
+def test_ambiguous_category_words_are_not_filters(ctx_for: MakeCtx) -> None:
+    """ "cordas de guitarra" é acessório: "cordas" não lista a categoria Cordas Orquestrais."""
+    result = run_tool("search_products", {"query": "cordas", "limit": 20}, ctx_for())
+    assert "Cordas Orquestrais" not in {p["category"] for p in result["products"]}
+
+
 def test_violoes_up_to_1000(ctx_for: MakeCtx) -> None:
     result = run_tool(
         "search_products", {"category": "violões", "max_price": 1000, "limit": 20}, ctx_for()

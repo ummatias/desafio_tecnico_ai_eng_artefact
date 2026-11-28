@@ -1,0 +1,8 @@
+id: 03-defeito-garantia-legal
+category: exchange
+source: "§4.2, §8.1, P-01, P-17"
+reference_date: 2026-02-14T10:00
+session: {phone: "(67) 98765-4321", tracking_source: fixture}
+turns:
+  - user: "oi, o violão do pedido 5 apareceu com o tampo rachado, o que eu faço?"
+  - user: "mas já passou de 30 dias da compra, ainda tenho direito?"

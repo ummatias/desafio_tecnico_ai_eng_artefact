@@ -1,0 +1,8 @@
+id: 02-carrinho-gd20
+category: cart
+source: "§3, §5.1, §6.2"
+reference_date: 2026-11-26T10:00
+session: {phone: "(67) 99654-7821"}
+turns:
+  - user: "quanto custa o takamine gd20?"
+  - user: "se eu levar ele e um ukulele kala ka-c, quanto fica com frete aqui em campo grande? e no pix?"

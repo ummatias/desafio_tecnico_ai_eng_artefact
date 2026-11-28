@@ -16,6 +16,9 @@ def test_normalize() -> None:
     assert normalize(f"**R${NBSP}2.199,00**") == "r$ 2.199,00"
     assert normalize(f"sexta{NB_HYPHEN}feira  às\n18:00") == "sexta-feira às 18:00"
     assert normalize(f"R${NARROW_NBSP}35,00") == "r$ 35,00"
+    assert (
+        normalize(f"8{NARROW_NBSP}% de desconto") == normalize("8% de desconto") == "8% de desconto"
+    )
 
 
 def test_facts_any_of_and_missing() -> None:

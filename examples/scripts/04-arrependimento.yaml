@@ -1,0 +1,8 @@
+id: 04-arrependimento
+category: exchange
+source: "§4.1, P-17"
+reference_date: 2026-01-20T10:00
+session: {phone: "(67) 98765-4321", tracking_source: fixture}
+turns:
+  - user: "me arrependi da minha compra, posso devolver meu pedido 5?"
+  - user: "mas eu recebi ontem!"

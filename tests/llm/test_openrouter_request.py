@@ -48,14 +48,21 @@ def test_provider_routing_defaults(harness: MakeHarness) -> None:
     assert body["provider"] == {"data_collection": "deny", "require_parameters": True}
     assert "reasoning" not in body
     assert "tools" not in body
+    assert body["temperature"] == 0.2
+
+
+def test_temperature_omitted_when_none(harness: MakeHarness) -> None:
+    h = harness(ok(), llm_temperature=None)
+    h.client.complete(HELLO, [])
+    [body] = h.server.bodies()
     assert "temperature" not in body
 
 
-def test_temperature_sent_when_set(harness: MakeHarness) -> None:
-    h = harness(ok(), llm_temperature=0.2)
+def test_temperature_override(harness: MakeHarness) -> None:
+    h = harness(ok(), llm_temperature=1.0)
     h.client.complete(HELLO, [])
     [body] = h.server.bodies()
-    assert body["temperature"] == 0.2
+    assert body["temperature"] == 1.0
 
 
 def test_pinned_providers_without_fallbacks(harness: MakeHarness) -> None:

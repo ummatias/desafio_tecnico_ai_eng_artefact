@@ -17,7 +17,7 @@ from emporio.repositories import Customer
 from emporio.tools.context import ToolContext
 from emporio.tools.format import br_date, weekday_name
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 AGENDA_DAYS = 7
 
 
